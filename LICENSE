@@ -1,0 +1,53 @@
+Dual License: zlib/libpng License + Tinyland Proprietary License
+
+===============================================================================
+Part 1: zlib/libpng License
+===============================================================================
+
+Copyright (c) 2024-2026 Tinyland, Inc.
+
+This software is provided 'as-is', without any express or implied warranty.
+In no event will the authors be held liable for any damages arising from the
+use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it freely,
+subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not claim
+   that you wrote the original software. If you use this software in a product,
+   an acknowledgment in the product documentation would be appreciated but is
+   not required.
+
+2. Altered source versions must be plainly marked as such, and must not be
+   misrepresented as being the original software.
+
+3. This notice may not be removed or altered from any source distribution.
+
+===============================================================================
+Part 2: Tinyland Proprietary License (LicenseRef-Tinyland-Proprietary)
+===============================================================================
+
+Copyright (c) 2024-2026 Tinyland, Inc. All rights reserved.
+
+The following additional terms apply to portions of this software that are
+marked as proprietary or that implement Tinyland-specific business logic:
+
+1. GRANT OF USE: You are granted a non-exclusive, non-transferable license to
+   use, copy, and modify this software solely for the purpose of building
+   applications that integrate with the Tinyland platform.
+
+2. RESTRICTIONS: You may not:
+   a. Redistribute proprietary portions as a standalone product
+   b. Remove or modify proprietary notices or license headers
+   c. Use proprietary portions to build a competing platform
+   d. Sublicense proprietary portions to third parties
+
+3. OPEN SOURCE COMPONENTS: Files and modules not marked as proprietary are
+   governed exclusively by the zlib/libpng License above.
+
+4. TERMINATION: This license terminates automatically if you violate any of
+   its terms. Upon termination, you must destroy all copies of the proprietary
+   portions in your possession.
+
+For licensing inquiries: legal@tinyland.dev
