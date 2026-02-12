@@ -74,7 +74,7 @@ describe('GlobalAccessibilityStore Buffer Management', () => {
 		expect(results[60].id).toBe('batch1-0');
 		expect(results[99].id).toBe('batch1-39');
 
-		const droppedIds = results.filter(r => r.id.startsWith('batch1-4'));
+		const droppedIds = results.filter(r => /^batch1-4\d$/.test(r.id));
 		expect(droppedIds.length).toBe(0);
 	});
 
