@@ -53,9 +53,9 @@ export { browser } from './env.js';
 // =============================================================================
 // Core Stores (no external dependencies)
 // =============================================================================
-export { csrfStore, getStoredToken, TOKEN_KEY } from './csrf.svelte.js';
+export { csrfStore, getCSRFHeaders, validateCSRF, refreshCSRF } from './csrf.svelte.js';
 export { loadingPhaseStore } from './loadingPhase.svelte.js';
-export { clientMetricsStore } from './clientMetrics.svelte.js';
+export { clientMetrics } from './clientMetrics.svelte.js';
 
 // =============================================================================
 // Auth Store
@@ -65,7 +65,19 @@ export { authStore } from './auth.svelte.js';
 // =============================================================================
 // Auto-Refresh Store
 // =============================================================================
-export { createAutoRefresh } from './auto-refresh.svelte.js';
+export {
+  registerRefresh,
+  stopRefresh,
+  pauseRefresh,
+  resumeRefresh,
+  pauseAll,
+  resumeAll,
+  stopAll,
+  triggerRefresh,
+  getRefreshStatus,
+  getIntervalByPriority,
+  type RefreshConfig
+} from './auto-refresh.svelte.js';
 
 // =============================================================================
 // AutoSave Store (requires tinyland-composables)

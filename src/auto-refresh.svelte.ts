@@ -27,7 +27,7 @@ export interface RefreshConfig {
 /**
  * Refresh orchestrator state
  */
-let activeRefreshers = $state<Map<string, NodeJS.Timeout>>(new Map());
+let activeRefreshers = $state<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 let pausedRefreshers = $state<Set<string>>(new Set());
 let errorCounts = $state<Map<string, number>>(new Map());
 

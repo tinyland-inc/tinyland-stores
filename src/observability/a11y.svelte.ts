@@ -373,7 +373,7 @@ function createA11yStore() {
 			state.fingerprint = await _deps.getFingerprint();
 			console.info('[A11y] Fingerprint initialized:', state.fingerprint);
 
-			state.a11yFingerprint = detectA11yFingerprint();
+			state.a11yFingerprint = detectA11yFingerprint() as typeof state.a11yFingerprint;
 			console.info('[A11y] A11y fingerprint detected:', state.a11yFingerprint);
 		} catch (error) {
 			console.error('[A11y] Failed to initialize fingerprint:', error);

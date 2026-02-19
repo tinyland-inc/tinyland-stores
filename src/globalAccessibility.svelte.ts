@@ -124,9 +124,10 @@ class GlobalAccessibilityStore {
     const combinedResults = [...newResults, ...this.#results];
     this.#results = combinedResults.slice(0, MAX_BUFFER_SIZE);
 
-    if (this.#orchestrator?.client && 'emit' in this.#orchestrator.client) {
+    const client = this.#orchestrator?.client;
+    if (client && 'emit' in client && typeof (client as Record<string, unknown>).emit === 'function') {
       try {
-        this.#orchestrator.client.emit('accessibility:batch', {
+        (client as { emit: (event: string, data: unknown) => void }).emit('accessibility:batch', {
           results: newResults,
           stats: newStats,
           timestamp: Date.now()
