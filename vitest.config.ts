@@ -1,5 +1,5 @@
 /**
- * Vitest Configuration for @tinyland-inc/tinyland-stores (Svelte variant)
+ * Vitest Configuration for @tummycrypt/tinyland-stores (Svelte variant)
  *
  * Works in three modes:
  *   1. Standalone:  cd packages/tinyland-stores && pnpm test

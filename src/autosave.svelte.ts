@@ -8,7 +8,7 @@
  * to prevent race conditions during rapid editing.
  */
 
-import { useEditorQueue } from '@tinyland-inc/tinyland-composables';
+import { useEditorQueue } from '@tummycrypt/tinyland-composables';
 
 interface Draft {
 	id: string;

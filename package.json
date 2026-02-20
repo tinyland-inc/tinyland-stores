@@ -1,5 +1,5 @@
 {
-  "name": "@tinyland-inc/tinyland-stores",
+  "name": "@tummycrypt/tinyland-stores",
   "version": "0.1.0",
   "description": "Svelte 5 reactive stores for authentication, theming, CSRF, observability, and accessibility state management",
   "type": "module",
@@ -48,8 +48,8 @@
     "directory": "packages/tinyland-stores"
   },
   "dependencies": {
-    "@tinyland-inc/tinyland-composables": "workspace:*",
-    "@tinyland-inc/tinyland-types": "workspace:*"
+    "@tummycrypt/tinyland-composables": "workspace:*",
+    "@tummycrypt/tinyland-types": "workspace:*"
   },
   "devDependencies": {
     "@fast-check/vitest": "^0.2.4",
@@ -72,5 +72,9 @@
   },
   "engines": {
     "node": ">=22.0.0"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
   }
 }

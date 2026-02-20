@@ -5,7 +5,7 @@
  * Call the appropriate configure*() function during app initialization
  * before using stores that depend on external services.
  *
- * @module @tinyland-inc/tinyland-stores
+ * @module @tummycrypt/tinyland-stores
  */
 
 // =============================================================================
