@@ -12,6 +12,7 @@ load("@aspect_rules_js//js:defs.bzl", "js_library", "js_run_binary", "js_test")
 load("@aspect_rules_js//npm:defs.bzl", "npm_package")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 load("@npm//:defs.bzl", "npm_link_all_packages")
+load("@npm//vitest:package_json.bzl", vitest_bin = "bin")
 
 # =============================================================================
 # npm link - makes node_modules available for this package
@@ -29,7 +30,7 @@ npm_link_all_packages(name = "node_modules")
 
 js_run_binary(
     name = "tinyland_stores_build",
-    tool = "//:svelte_package_bin",
+    tool = "//:svelte_package",
     srcs = glob(
         [
             "src/**/*.ts",
@@ -97,7 +98,7 @@ ts_project(
     ],
 )
 
-js_test(
+vitest_bin.vitest_test(
     name = "test",
     data = [
         ":tinyland_stores",
@@ -106,7 +107,6 @@ js_test(
         ":node_modules/vitest",
         "vitest.config.ts",
     ],
-    entry_point = "//:vitest_bin",
     args = [
         "run",
         "--reporter=verbose",
@@ -123,7 +123,7 @@ js_test(
 
 js_run_binary(
     name = "typecheck",
-    tool = "//:svelte_check_bin",
+    tool = "//:svelte_check",
     srcs = glob(
         [
             "src/**/*.ts",
