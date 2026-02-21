@@ -1,0 +1,79 @@
+{
+  "name": "@tinyland-inc/tinyland-stores",
+  "version": "0.1.0",
+  "description": "Svelte 5 reactive stores for authentication, theming, CSRF, observability, and accessibility state management",
+  "type": "module",
+  "license": "Zlib AND LicenseRef-Tinyland-Proprietary",
+  "svelte": "./dist/index.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "svelte": "./dist/index.js",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "svelte-package -i src -o dist",
+    "dev": "svelte-package -i src -o dist --watch",
+    "clean": "rm -rf dist",
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "svelte-check --tsconfig ./tsconfig.json",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "svelte5",
+    "runes",
+    "stores",
+    "reactive",
+    "theme",
+    "auth",
+    "csrf",
+    "observability",
+    "circuit-breaker",
+    "accessibility"
+  ],
+  "author": "Tinyland.dev",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tinyland-inc/tinyland-stores.git"
+  },
+  "dependencies": {
+    "@tinyland-inc/tinyland-composables": "^0.1.0",
+    "@tinyland-inc/tinyland-types": "^0.1.0"
+  },
+  "devDependencies": {
+    "@fast-check/vitest": "^0.2.4",
+    "@sveltejs/package": "^2.3.0",
+    "@types/node": "^22.0.0",
+    "fast-check": "^4.3.0",
+    "svelte": "^5.0.0",
+    "svelte-check": "^4.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^4.0.0"
+  },
+  "peerDependencies": {
+    "svelte": "^5.0.0",
+    "@opentelemetry/api": "^1.9.0"
+  },
+  "peerDependenciesMeta": {
+    "@opentelemetry/api": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
+  }
+}
