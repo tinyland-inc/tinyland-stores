@@ -37,6 +37,7 @@ js_run_binary(
             "src/**/*.test.ts",
             "src/**/*.spec.ts",
         ],
+        allow_empty = True,
     ) + [
         "package.json",
         "tsconfig.json",
