@@ -26,7 +26,7 @@ load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 
 js_run_binary(
     name = "tinyland_stores_build",
-    tool = "//:node_modules/@sveltejs/package/bin.js",
+    tool = "//:node_modules/@sveltejs/package/svelte-package.js",
     srcs = glob(
         [
             "src/**/*.ts",
