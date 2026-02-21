@@ -11,10 +11,13 @@ Uses svelte-package instead of plain tsc.
 load("@aspect_rules_js//js:defs.bzl", "js_library", "js_run_binary", "js_test")
 load("@aspect_rules_js//npm:defs.bzl", "npm_package")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
+load("@npm//:defs.bzl", "npm_link_all_packages")
 
 # =============================================================================
 # npm link - makes node_modules available for this package
 # =============================================================================
+
+npm_link_all_packages(name = "node_modules")
 
 
 # =============================================================================
@@ -41,7 +44,7 @@ js_run_binary(
     ) + [
         "package.json",
         "tsconfig.json",
-        "//:node_modules",
+        ":node_modules",
         "//packages:tsconfig_base",
     ],
     args = [
@@ -89,8 +92,8 @@ ts_project(
     transpiler = "tsc",
     deps = [
         ":tinyland_stores",
-        "//:node_modules",
-        "//:node_modules/vitest",
+        ":node_modules",
+        ":node_modules/vitest",
     ],
 )
 
@@ -99,8 +102,8 @@ js_test(
     data = [
         ":tinyland_stores",
         ":tinyland_stores_test_lib",
-        "//:node_modules",
-        "//:node_modules/vitest",
+        ":node_modules",
+        ":node_modules/vitest",
         "vitest.config.ts",
     ],
     entry_point = "//:vitest_bin",
@@ -130,7 +133,7 @@ js_run_binary(
         allow_empty = True,
     ) + [
         "tsconfig.json",
-        "//:node_modules",
+        ":node_modules",
         "//packages:tsconfig_base",
     ],
     args = [
