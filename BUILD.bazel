@@ -121,11 +121,14 @@ js_test(
 js_run_binary(
     name = "typecheck",
     tool = "//:node_modules/svelte-check/bin/svelte-check",
-    srcs = glob([
-        "src/**/*.ts",
-        "src/**/*.svelte",
-        "src/**/*.svelte.ts",
-    ]) + [
+    srcs = glob(
+        [
+            "src/**/*.ts",
+            "src/**/*.svelte",
+            "src/**/*.svelte.ts",
+        ],
+        allow_empty = True,
+    ) + [
         "tsconfig.json",
         "//:node_modules",
         "//:tsconfig_base",
