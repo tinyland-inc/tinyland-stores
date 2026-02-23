@@ -11,12 +11,12 @@ import {
 	type CircuitBreakerState
 } from '../src/observability/circuitBreaker.svelte.js';
 
-/**
- * Circuit Breaker Tests
- *
- * Tests the smart circuit breaker pattern with sliding window,
- * exponential backoff, and state transitions.
- */
+
+
+
+
+
+
 describe('Circuit Breaker', () => {
 	let state: CircuitBreakerState;
 
@@ -68,7 +68,7 @@ describe('Circuit Breaker', () => {
 
 		it('should open on 5+ consecutive failures', () => {
 			const now = Date.now();
-			state.lastSuccessAt = now - 600000; // Success was 10 minutes ago
+			state.lastSuccessAt = now - 600000; 
 			state.failureWindow = [
 				{ timestamp: now - 5000, error: 'error 1' },
 				{ timestamp: now - 4000, error: 'error 2' },
@@ -81,7 +81,7 @@ describe('Circuit Breaker', () => {
 
 		it('should open on 2+ failures in 60s with no successes', () => {
 			const now = Date.now();
-			state.lastSuccessAt = now - 120000; // No recent success
+			state.lastSuccessAt = now - 120000; 
 			state.failureWindow = [
 				{ timestamp: now - 30000, error: 'error 1' },
 				{ timestamp: now - 10000, error: 'error 2' }
@@ -91,7 +91,7 @@ describe('Circuit Breaker', () => {
 
 		it('should NOT open if recent success exists in 60s window', () => {
 			const now = Date.now();
-			state.lastSuccessAt = now - 5000; // Success 5s ago
+			state.lastSuccessAt = now - 5000; 
 			state.failureWindow = [
 				{ timestamp: now - 3000, error: 'error 1' }
 			];
@@ -196,7 +196,7 @@ describe('Circuit Breaker', () => {
 
 			state = recordFailure(state, 'error 15');
 
-			// recordFailure pushes then slices to 10
+			
 			expect(state.failureWindow.length).toBeLessThanOrEqual(10);
 		});
 
@@ -212,7 +212,7 @@ describe('Circuit Breaker', () => {
 	describe('checkHalfOpenTransition', () => {
 		it('should transition OPEN to HALF_OPEN when timeout expires', () => {
 			state.state = 'OPEN';
-			state.disabledUntil = Date.now() - 1000; // expired
+			state.disabledUntil = Date.now() - 1000; 
 
 			state = checkHalfOpenTransition(state);
 			expect(state.state).toBe('HALF_OPEN');
@@ -220,7 +220,7 @@ describe('Circuit Breaker', () => {
 
 		it('should not transition if timeout not expired', () => {
 			state.state = 'OPEN';
-			state.disabledUntil = Date.now() + 30000; // 30s from now
+			state.disabledUntil = Date.now() + 30000; 
 
 			state = checkHalfOpenTransition(state);
 			expect(state.state).toBe('OPEN');
@@ -295,10 +295,10 @@ describe('Circuit Breaker', () => {
 
 	describe('State Machine Integration', () => {
 		it('should follow CLOSED -> OPEN -> HALF_OPEN -> CLOSED lifecycle', () => {
-			// Start CLOSED
+			
 			expect(state.state).toBe('CLOSED');
 
-			// Cause enough failures to open
+			
 			const now = Date.now();
 			state.failureWindow = [
 				{ timestamp: now - 3000, error: 'e1' },
@@ -306,16 +306,16 @@ describe('Circuit Breaker', () => {
 			];
 			state = recordFailure(state, 'e3');
 
-			// Should be OPEN after 3 failures
+			
 			expect(state.state).toBe('OPEN');
 			expect(state.disabledUntil).not.toBeNull();
 
-			// Simulate timeout expiry
+			
 			state.disabledUntil = Date.now() - 1;
 			state = checkHalfOpenTransition(state);
 			expect(state.state).toBe('HALF_OPEN');
 
-			// Success in HALF_OPEN -> CLOSED
+			
 			state = recordSuccess(state);
 			expect(state.state).toBe('CLOSED');
 		});

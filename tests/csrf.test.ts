@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 
-/**
- * CSRF Store Tests
- *
- * Tests the CSRF token generation, rotation, and validation logic
- * extracted from the csrfStore module.
- */
+
+
+
+
+
+
 describe('CSRF Store', () => {
 	let mockStorage: Record<string, string>;
 
@@ -27,11 +27,11 @@ describe('CSRF Store', () => {
 
 	describe('Token Generation', () => {
 		it('should generate tokens of expected length', () => {
-			// Simulating the token generation logic from csrf.svelte.ts
+			
 			const generateToken = (): string => {
 				const array = new Uint8Array(32);
-				// In browser, would use crypto.getRandomValues
-				// For test, use Math.random to fill
+				
+				
 				for (let i = 0; i < array.length; i++) {
 					array[i] = Math.floor(Math.random() * 256);
 				}
@@ -39,7 +39,7 @@ describe('CSRF Store', () => {
 			};
 
 			const token = generateToken();
-			expect(token).toHaveLength(64); // 32 bytes * 2 hex chars each
+			expect(token).toHaveLength(64); 
 			expect(token).toMatch(/^[0-9a-f]{64}$/);
 		});
 
@@ -56,7 +56,7 @@ describe('CSRF Store', () => {
 			for (let i = 0; i < 100; i++) {
 				tokens.add(generateToken());
 			}
-			// All 100 tokens should be unique
+			
 			expect(tokens.size).toBe(100);
 		});
 	});
@@ -102,7 +102,7 @@ describe('CSRF Store', () => {
 			const oldToken = generateToken();
 			localStorage.setItem(TOKEN_KEY, oldToken);
 
-			// Rotate
+			
 			const newToken = generateToken();
 			localStorage.setItem(TOKEN_KEY, newToken);
 

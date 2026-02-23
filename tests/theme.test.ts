@@ -1,16 +1,16 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 
-/**
- * Theme Store Tests
- *
- * Tests the theme store logic including:
- * - Theme initialization and defaults
- * - Theme switching
- * - CSS custom property generation
- * - Property-based testing for valid themes -> valid CSS variables
- */
 
-// Valid themes as defined in the theme store
+
+
+
+
+
+
+
+
+
+
 const VALID_THEMES = [
 	'modern',
 	'crimson',
@@ -27,12 +27,12 @@ const VALID_THEMES = [
 	'hamlindigo'
 ];
 
-// Theme to CSS class mapping logic
+
 function themeToBodyClass(theme: string): string {
 	return `theme-${theme}`;
 }
 
-// Valid theme property patterns
+
 const CSS_VARIABLE_PATTERN = /^--[a-z][a-z0-9-]*$/;
 
 describe('Theme Store Logic', () => {
@@ -120,10 +120,10 @@ describe('Theme Store Logic', () => {
 	});
 
 	describe('CSS Variable Generation (PBT)', () => {
-		/**
-		 * Property-based test: For every valid theme, the generated CSS
-		 * variable names should follow the --kebab-case pattern.
-		 */
+		
+
+
+
 		const COLOR_SCALES = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950];
 		const COLOR_CHANNELS = ['primary', 'secondary', 'tertiary', 'success', 'warning', 'error', 'surface'];
 
@@ -143,7 +143,7 @@ describe('Theme Store Logic', () => {
 			'PBT: theme "%s" should produce valid body class name',
 			(theme) => {
 				const className = themeToBodyClass(theme);
-				// Valid CSS class: starts with letter, only contains letters, numbers, hyphens
+				
 				expect(className).toMatch(/^[a-z][a-z0-9-]*$/);
 			}
 		);
@@ -155,7 +155,7 @@ describe('Theme Store Logic', () => {
 		});
 
 		it('PBT: color scale values should be monotonically increasing', () => {
-			// Verify the scale array is sorted
+			
 			for (let i = 1; i < COLOR_SCALES.length; i++) {
 				expect(COLOR_SCALES[i]).toBeGreaterThan(COLOR_SCALES[i - 1]);
 			}
@@ -172,9 +172,9 @@ describe('Theme Store Logic', () => {
 
 	describe('Theme Mode Computation', () => {
 		it('should compute light mode for non-dark themes', () => {
-			// The theme store uses a computed isDark based on theme name or user pref
+			
 			const computeMode = (theme: string, systemDark: boolean): 'light' | 'dark' => {
-				// If user explicitly set mode, use that; otherwise, follow system
+				
 				return systemDark ? 'dark' : 'light';
 			};
 
