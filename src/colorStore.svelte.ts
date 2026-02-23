@@ -1,26 +1,26 @@
-/**
- * Reactive color parsing with Svelte 5 Runes
- * Provides type-safe color operations with railway-oriented error handling
- *
- * NOTE: Color parsing utilities (parseOklchString, etc.) must be injected
- * via configureColorStore() before use, or the store falls back to basic
- * RGB/hex parsing only.
- *
- * @module colorStore
- */
+
+
+
+
+
+
+
+
+
+
 
 import type { ColorResult, ColorValue, ColorError } from './types/color.js';
 
-// Re-export types for consumers
+
 export type { ColorResult, ColorValue, ColorError };
 
-// RGB type
+
 type RGBColor = { r: number; g: number; b: number };
 
-/**
- * Color utility injection interface.
- * Provide these functions via configureColorStore() to enable OKLCH/OKLAB parsing.
- */
+
+
+
+
 export interface ColorUtilities {
 	parseOklchString: (input: string) => { l: number; c: number; h: number; alpha: number } | null;
 	parseOklabString: (input: string) => { l: number; a: number; b: number; alpha: number } | null;
@@ -30,28 +30,28 @@ export interface ColorUtilities {
 
 let _colorUtils: ColorUtilities | null = null;
 
-/**
- * Configure color utilities for OKLCH/OKLAB support.
- * Call this once during app initialization.
- */
+
+
+
+
 export function configureColorStore(utils: ColorUtilities): void {
 	_colorUtils = utils;
 }
 
-/**
- * Parse CSS color string and return ColorResult
- *
- * Supports:
- * - OKLCH: oklch(0.7 0.15 200) (requires configureColorStore)
- * - OKLAB: oklab(0.7 0.1 -0.05) (requires configureColorStore)
- * - RGB: rgb(255, 0, 0), rgba(255, 0, 0, 0.5)
- * - Hex: #ff0000, #ff0000ff
- */
+
+
+
+
+
+
+
+
+
 export function createColorValue(cssString: string): ColorResult<ColorValue> {
 	const input = cssString.trim();
 	const lowerInput = input.toLowerCase();
 
-	// OKLCH parsing (most common from getComputedStyle)
+	
 	if (lowerInput.startsWith('oklch(')) {
 		if (!_colorUtils) {
 			return {
@@ -92,7 +92,7 @@ export function createColorValue(cssString: string): ColorResult<ColorValue> {
 		};
 	}
 
-	// OKLAB parsing
+	
 	if (lowerInput.startsWith('oklab(')) {
 		if (!_colorUtils) {
 			return {
@@ -133,7 +133,7 @@ export function createColorValue(cssString: string): ColorResult<ColorValue> {
 		};
 	}
 
-	// RGB parsing (fast path)
+	
 	const rgbMatch = lowerInput.match(/rgba?\((\d+),?\s*(\d+),?\s*(\d+)(?:,?\s*([0-9.]+))?\)/);
 	if (rgbMatch) {
 		return {
@@ -148,7 +148,7 @@ export function createColorValue(cssString: string): ColorResult<ColorValue> {
 		};
 	}
 
-	// Hex parsing
+	
 	const hexMatch = lowerInput.match(/^#?([0-9a-f]{6})([0-9a-f]{2})?$/);
 	if (hexMatch) {
 		return {
@@ -177,16 +177,16 @@ export function createColorValue(cssString: string): ColorResult<ColorValue> {
 	};
 }
 
-/**
- * Check if RGB color is within sRGB gamut
- */
+
+
+
 function isInSrgbGamut(rgb: RGBColor): boolean {
 	return rgb.r >= 0 && rgb.r <= 255 && rgb.g >= 0 && rgb.g <= 255 && rgb.b >= 0 && rgb.b <= 255;
 }
 
-/**
- * Create reactive color store with Svelte 5 Runes
- */
+
+
+
 export function createReactiveColor(initialValue: string) {
 	let cssString = $state(initialValue);
 	let result = $derived(createColorValue(cssString));
@@ -204,9 +204,9 @@ export function createReactiveColor(initialValue: string) {
 	};
 }
 
-/**
- * Create reactive contrast calculator
- */
+
+
+
 export function createContrastCalculator(foregroundCss: string, backgroundCss: string) {
 	const fg = createReactiveColor(foregroundCss);
 	const bg = createReactiveColor(backgroundCss);
@@ -244,9 +244,9 @@ export function createContrastCalculator(foregroundCss: string, backgroundCss: s
 	};
 }
 
-/**
- * Calculate WCAG contrast ratio between two RGB colors
- */
+
+
+
 function calculateContrastRatio(
 	rgb1: readonly [number, number, number],
 	rgb2: readonly [number, number, number]
@@ -260,9 +260,9 @@ function calculateContrastRatio(
 	return (lighter + 0.05) / (darker + 0.05);
 }
 
-/**
- * Calculate relative luminance (WCAG formula)
- */
+
+
+
 function getRelativeLuminance(rgb: readonly [number, number, number]): number {
 	const [r, g, b] = rgb.map((val) => {
 		const srgb = val / 255;

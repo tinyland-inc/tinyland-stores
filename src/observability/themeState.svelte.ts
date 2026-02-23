@@ -1,24 +1,24 @@
-/**
- * Theme State Observability Store
- *
- * Svelte 5 runes-based store for theme changes and hydration tracking.
- * Streams theme events via tRPC for observability.
- *
- * DEPENDENCY INJECTION: The tRPC observability client must be provided
- * via configureThemeStateObservability() before calling flush().
- *
- * Replaces: Socket.IO-based theme state streaming with delta compression
- * Benefits: Type-safe, reliable, no WebSocket complexity
- */
+
+
+
+
+
+
+
+
+
+
+
+
 
 import type { ObservabilityClient } from '../types/trpc.js';
 
 let _observabilityClient: ObservabilityClient | null = null;
 
-/**
- * Configure the observability client for theme state ingestion.
- * Must be called before themeStateStore.flush().
- */
+
+
+
+
 export function configureThemeStateObservability(client: ObservabilityClient): void {
 	_observabilityClient = client;
 }
@@ -40,10 +40,10 @@ interface ThemeEvent {
 	hydrationDuration?: number;
 }
 
-/**
- * Create reactive theme state store
- * Uses $state rune for reactivity
- */
+
+
+
+
 function createThemeStateStore() {
 	let state = $state<ThemeState>({
 		currentTheme: null,
@@ -161,7 +161,7 @@ function createThemeStateStore() {
 	};
 }
 
-/**
- * Singleton theme state store instance
- */
+
+
+
 export const themeStateStore = createThemeStateStore();

@@ -1,61 +1,61 @@
-/**
- * Smart Circuit Breaker for A11y Monitoring
- *
- * Implements intelligent circuit breaker pattern that ONLY opens on repeated failures,
- * not single transient errors.
- *
- * Features:
- * - Sliding window failure tracking (last 10 attempts)
- * - Smart opening logic (3 conditions: 60% failure rate, 5 consecutive, or all in 60s)
- * - Half-open state with exponential backoff (30s -> 5min)
- * - State persistence (localStorage)
- * - Manual reset capability
- * - Telemetry logging
- *
- * State Machine:
- * CLOSED -> OPEN (3/5 failures OR 5 consecutive OR 2+ in 60s)
- * OPEN -> HALF_OPEN (after timeout: 30s, 60s, 2min, 5min)
- * HALF_OPEN -> CLOSED (test succeeds)
- * HALF_OPEN -> OPEN (test fails, longer backoff)
- * OPEN -> HALF_OPEN (manual reset)
- */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 import { browser } from '../env.js';
 
-/**
- * Circuit breaker state type
- */
+
+
+
 export type CircuitBreakerStateType = 'CLOSED' | 'HALF_OPEN' | 'OPEN';
 
-/**
- * Failure entry in sliding window
- */
+
+
+
 export interface FailureEntry {
 	timestamp: number;
 	error: string;
 }
 
-/**
- * Circuit breaker state structure
- */
+
+
+
 export interface CircuitBreakerState {
 	state: CircuitBreakerStateType;
-	failures: number; // Legacy counter (kept for compatibility)
+	failures: number; 
 	lastFailureTime: number | null;
 	disabledUntil: number | null;
 
-	// Sliding window tracking
+	
 	failureWindow: FailureEntry[];
 	lastSuccessAt: number | null;
 
-	// Manual reset tracking
+	
 	manualResetCount: number;
 	lastManualResetAt: number | null;
 }
 
-/**
- * Circuit breaker event metadata
- */
+
+
+
 export interface CircuitBreakerEvent {
 	timestamp: number;
 	timestamp_iso: string;
@@ -66,9 +66,9 @@ export interface CircuitBreakerEvent {
 	[key: string]: unknown;
 }
 
-/**
- * Initialize circuit breaker with default state
- */
+
+
+
 export function createCircuitBreaker(): CircuitBreakerState {
 	return {
 		state: 'CLOSED',
@@ -82,31 +82,31 @@ export function createCircuitBreaker(): CircuitBreakerState {
 	};
 }
 
-/**
- * Smart circuit breaker logic - evaluates if circuit should OPEN based on sliding window
- *
- * Circuit OPENS when ANY of these conditions are met:
- * - 3+ failures in last 5 attempts (60% failure rate)
- * - 5+ consecutive failures
- * - All failures in last 60 seconds (no successes)
- *
- * Circuit does NOT open on:
- * - Single transient error
- * - Isolated failures with recent successes
- */
+
+
+
+
+
+
+
+
+
+
+
+
 export function shouldOpenCircuitBreaker(state: CircuitBreakerState): boolean {
 	const failureWindow = state.failureWindow || [];
 	const now = Date.now();
 	const SIXTY_SECONDS = 60 * 1000;
 	const FIVE_MINUTES = 5 * 60 * 1000;
 
-	// No failures yet - stay closed
+	
 	if (failureWindow.length === 0) return false;
 
-	// Clean up old failures (>5 minutes old)
+	
 	const recentFailures = failureWindow.filter((f) => now - f.timestamp < FIVE_MINUTES);
 
-	// Condition 1: 3+ failures in last 5 attempts (60% failure rate)
+	
 	if (recentFailures.length >= 3) {
 		const last5Attempts = recentFailures.slice(-5);
 		const failuresIn5 = last5Attempts.length;
@@ -118,7 +118,7 @@ export function shouldOpenCircuitBreaker(state: CircuitBreakerState): boolean {
 		}
 	}
 
-	// Condition 2: 5+ consecutive failures (no successes in window)
+	
 	if (recentFailures.length >= 5) {
 		const lastSuccess = state.lastSuccessAt || 0;
 		const oldestFailure = recentFailures[0].timestamp;
@@ -130,7 +130,7 @@ export function shouldOpenCircuitBreaker(state: CircuitBreakerState): boolean {
 		}
 	}
 
-	// Condition 3: All failures in last 60 seconds (no successes)
+	
 	const failuresInLast60s = recentFailures.filter((f) => now - f.timestamp < SIXTY_SECONDS);
 	if (failuresInLast60s.length > 0) {
 		const lastSuccess = state.lastSuccessAt || 0;
@@ -146,25 +146,25 @@ export function shouldOpenCircuitBreaker(state: CircuitBreakerState): boolean {
 	return false;
 }
 
-/**
- * Get next retry timeout for HALF_OPEN state (exponential backoff)
- *
- * Backoff schedule:
- * - 1st failure: 30 seconds
- * - 2nd failure: 60 seconds
- * - 3rd failure: 120 seconds (2 minutes)
- * - 4th+ failures: 300 seconds (5 minutes, max)
- */
+
+
+
+
+
+
+
+
+
 export function getNextRetryTimeout(failureCount: number): number {
-	const baseTimeout = 30 * 1000; // 30 seconds
-	const maxTimeout = 5 * 60 * 1000; // 5 minutes
+	const baseTimeout = 30 * 1000; 
+	const maxTimeout = 5 * 60 * 1000; 
 	const timeout = Math.min(baseTimeout * Math.pow(2, failureCount - 1), maxTimeout);
 	return timeout;
 }
 
-/**
- * Persist circuit breaker state to localStorage
- */
+
+
+
 export function persistCircuitBreakerState(state: CircuitBreakerState): void {
 	if (!browser) return;
 
@@ -187,9 +187,9 @@ export function persistCircuitBreakerState(state: CircuitBreakerState): void {
 	}
 }
 
-/**
- * Load circuit breaker state from localStorage
- */
+
+
+
 export function loadCircuitBreakerState(): CircuitBreakerState | null {
 	if (!browser) return null;
 
@@ -216,9 +216,9 @@ export function loadCircuitBreakerState(): CircuitBreakerState | null {
 	return null;
 }
 
-/**
- * Log circuit breaker telemetry events
- */
+
+
+
 export function logCircuitBreakerEvent(
 	eventType: string,
 	state: CircuitBreakerState,
@@ -237,9 +237,9 @@ export function logCircuitBreakerEvent(
 	console.info(`[A11y Circuit Breaker] ${eventType}`, event);
 }
 
-/**
- * Record successful request
- */
+
+
+
 export function recordSuccess(state: CircuitBreakerState): CircuitBreakerState {
 	const now = Date.now();
 
@@ -262,9 +262,9 @@ export function recordSuccess(state: CircuitBreakerState): CircuitBreakerState {
 	return state;
 }
 
-/**
- * Record failed request
- */
+
+
+
 export function recordFailure(
 	state: CircuitBreakerState,
 	error: string
@@ -327,9 +327,9 @@ export function recordFailure(
 	return state;
 }
 
-/**
- * Check if circuit should transition from OPEN to HALF_OPEN
- */
+
+
+
 export function checkHalfOpenTransition(state: CircuitBreakerState): CircuitBreakerState {
 	const now = Date.now();
 
@@ -349,9 +349,9 @@ export function checkHalfOpenTransition(state: CircuitBreakerState): CircuitBrea
 	return state;
 }
 
-/**
- * Manual reset circuit breaker (admin override)
- */
+
+
+
 export function manualResetCircuitBreaker(state: CircuitBreakerState): CircuitBreakerState {
 	const now = Date.now();
 
@@ -373,9 +373,9 @@ export function manualResetCircuitBreaker(state: CircuitBreakerState): CircuitBr
 	return state;
 }
 
-/**
- * Get human-readable countdown for OPEN state
- */
+
+
+
 export function getCountdownText(state: CircuitBreakerState): string | null {
 	if (state.state !== 'OPEN' || !state.disabledUntil) return null;
 

@@ -1,12 +1,12 @@
-/**
- * Authentication Store (Svelte 5 Runes)
- *
- * Manages authentication user state with:
- * - Session persistence via localStorage (display data only)
- * - httpOnly cookie-based sessionId (server-validated)
- * - Periodic session validity checks
- * - Reactive getters for components
- */
+
+
+
+
+
+
+
+
+
 
 import { browser } from './env.js';
 
@@ -21,25 +21,25 @@ interface AuthSession {
   user: AuthUser;
   sessionId: string;
   expires: string;
-  id?: string; // Legacy field - prefer sessionId
+  id?: string; 
 }
 
-// What we store in localStorage - EXCLUDES sessionId for security
-// The actual sessionId lives in httpOnly cookies only
+
+
 interface StoredAuthData {
   user: AuthUser;
   expires: string;
 }
 
 class AuthStore {
-  // Private state using Svelte 5 runes
+  
   #session = $state<AuthSession | null>(null);
   #isLoading = $state(true);
   #lastCheck = $state<Date | null>(null);
 
-  // Storage key
+  
   private readonly STORAGE_KEY = 'stonewall_auth_session';
-  private readonly CHECK_INTERVAL = 60000; // Check every minute
+  private readonly CHECK_INTERVAL = 60000; 
   private checkInterval: ReturnType<typeof setInterval> | null = null;
 
   constructor() {
@@ -48,7 +48,7 @@ class AuthStore {
     }
   }
 
-  // Getters for reactive state
+  
   get session() { return this.#session; }
   get user() { return this.#session?.user || null; }
   get isAuthenticated() { return !!this.#session; }
@@ -59,27 +59,27 @@ class AuthStore {
   }
   get isSuperAdmin() { return this.#session?.user?.role === 'super_admin'; }
 
-  // Initialize from localStorage
-  // NOTE: We only store user display data here, NOT the sessionId
-  // The sessionId is stored in an httpOnly cookie for security
+  
+  
+  
   private init() {
     try {
       const stored = localStorage.getItem(this.STORAGE_KEY);
       if (stored) {
         const data = JSON.parse(stored) as StoredAuthData;
 
-        // Check if session is expired
+        
         if (new Date(data.expires) > new Date()) {
-          // Reconstruct session with placeholder sessionId
-          // The real sessionId is in httpOnly cookie and validated server-side
+          
+          
           this.#session = {
             user: data.user,
             expires: data.expires,
-            sessionId: '[httpOnly]' // Placeholder - real ID in cookie
+            sessionId: '[httpOnly]' 
           };
           console.log('[AuthStore] Restored user from localStorage:', data.user.name);
 
-          // Start periodic checks (validates via server)
+          
           this.startPeriodicCheck();
         } else {
           console.log('[AuthStore] Stored session expired, clearing');
@@ -94,16 +94,16 @@ class AuthStore {
     }
   }
 
-  // Set session (called after successful login)
-  // SECURITY: Only stores user display data in localStorage, NOT sessionId
-  // The sessionId must be passed via httpOnly cookie for auth
+  
+  
+  
   setSession(session: AuthSession) {
     this.#session = session;
 
     if (browser) {
       try {
-        // SECURITY FIX: Only store user display data, NOT sessionId
-        // The sessionId lives in httpOnly cookies only to prevent XSS theft
+        
+        
         const storedData: StoredAuthData = {
           user: session.user,
           expires: session.expires
@@ -111,7 +111,7 @@ class AuthStore {
         localStorage.setItem(this.STORAGE_KEY, JSON.stringify(storedData));
         console.log('[AuthStore] User data stored in localStorage (sessionId in httpOnly cookie)');
 
-        // Start periodic checks
+        
         this.startPeriodicCheck();
       } catch (error) {
         console.error('[AuthStore] Failed to store session:', error);
@@ -119,7 +119,7 @@ class AuthStore {
     }
   }
 
-  // Clear session (logout)
+  
   clearSession() {
     this.#session = null;
 
@@ -129,22 +129,22 @@ class AuthStore {
     }
   }
 
-  // Check if session is still valid
+  
   async checkSession(): Promise<boolean> {
     if (!this.#session) return false;
 
-    // Check local expiry first
+    
     if (new Date(this.#session.expires) <= new Date()) {
       console.log('[AuthStore] Session expired');
       this.clearSession();
       return false;
     }
 
-    // Verify with server - sessionId is sent via httpOnly cookie automatically
+    
     try {
       const response = await fetch('/api/auth/verify', {
         method: 'POST',
-        credentials: 'include', // Sends httpOnly cookies
+        credentials: 'include', 
         headers: { 'Content-Type': 'application/json' }
       });
 
@@ -158,12 +158,12 @@ class AuthStore {
       return true;
     } catch (error) {
       console.error('[AuthStore] Failed to verify session:', error);
-      // Keep session if we can't reach server
+      
       return true;
     }
   }
 
-  // Start periodic session checks
+  
   private startPeriodicCheck() {
     if (this.checkInterval) return;
 
@@ -172,7 +172,7 @@ class AuthStore {
     }, this.CHECK_INTERVAL);
   }
 
-  // Stop periodic checks
+  
   private stopPeriodicCheck() {
     if (this.checkInterval) {
       clearInterval(this.checkInterval);
@@ -180,13 +180,13 @@ class AuthStore {
     }
   }
 
-  // Logout
+  
   async logout() {
     try {
-      // Call server logout endpoint
+      
       await fetch('/api/auth/logout', {
         method: 'POST',
-        credentials: 'include' // Ensure cookies are sent
+        credentials: 'include' 
       });
     } catch (error) {
       console.error('[AuthStore] Logout error:', error);
@@ -195,7 +195,7 @@ class AuthStore {
     }
   }
 
-  // Update user info
+  
   updateUser(updates: Partial<AuthUser>) {
     if (!this.#session) return;
 
@@ -207,7 +207,7 @@ class AuthStore {
       }
     };
 
-    // Update localStorage
+    
     if (browser) {
       try {
         localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.#session));
@@ -218,10 +218,10 @@ class AuthStore {
   }
 }
 
-// Export singleton instance
+
 export const authStore = new AuthStore();
 
-// Export reactive getters for use in components
+
 export function useAuth() {
   return {
     get session() { return authStore.session; },

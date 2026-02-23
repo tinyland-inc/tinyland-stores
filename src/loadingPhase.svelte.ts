@@ -1,38 +1,38 @@
-/**
- * Loading Phase Store - Svelte 5 Runes
- *
- * Tracks loading progress through phases that mirror the OTel-first architecture:
- *
- * SERVER-SIDE (already completed by render time):
- * 1. fingerprintSettingsHandle -> queries Tempo for fingerprint settings
- * 2. consentCheckHandle -> restores consent from Tempo OR cookies
- * 3. referrerEnrichmentHandle -> enriches referrer with ActivityPub/UTM/etc.
- *
- * CLIENT-SIDE (hydration phases this store tracks):
- * 1. 'detecting-fingerprint' -> checking server data for fingerprint
- * 2. 'waiting-for-tempo' -> polling Tempo if unavailable (retry loop)
- * 3. 'restoring-preferences' -> applying Tempo-restored or default settings
- * 4. 'loading-theme' -> hydrating theme from server settings
- * 5. 'starting-services' -> metrics, tRPC, navigation tracking
- * 6. 'loading-a11y' -> conditionally loading a11y components
- * 7. 'ready' -> app fully hydrated
- */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 export type LoadingPhase =
-	| 'detecting-fingerprint'  // 5% - Check server-provided fingerprint data
-	| 'waiting-for-tempo'      // 10% - Polling Tempo if unavailable
-	| 'restoring-preferences'  // 15% - Restore from Tempo or use defaults
-	| 'loading-theme'          // 30% - Hydrate theme settings
-	| 'starting-services'      // 50% - Metrics, tRPC, navigation
-	| 'connecting-trpc'        // 70% - tRPC connection specifically
-	| 'loading-a11y'           // 90% - A11y components (if consented)
-	| 'ready';                 // 100% - Fully hydrated
+	| 'detecting-fingerprint'  
+	| 'waiting-for-tempo'      
+	| 'restoring-preferences'  
+	| 'loading-theme'          
+	| 'starting-services'      
+	| 'connecting-trpc'        
+	| 'loading-a11y'           
+	| 'ready';                 
 
 interface LoadingState {
 	phase: LoadingPhase;
 	progress: number;
 	message: string;
-	/** Whether settings came from Tempo (returning visitor) */
+	
 	restoredFromTempo: boolean;
 }
 
@@ -71,27 +71,27 @@ class LoadingPhaseStore {
 		return this.state.phase === 'ready';
 	}
 
-	/** Whether settings were restored from Tempo (returning visitor) */
+	
 	get restoredFromTempo(): boolean {
 		return this.state.restoredFromTempo;
 	}
 
-	/**
-	 * Set whether settings were restored from Tempo
-	 * Called after checking server data for fingerprint settings
-	 */
+	
+
+
+
 	setRestoredFromTempo(restored: boolean): void {
 		this.state.restoredFromTempo = restored;
-		// Update message to reflect source
+		
 		if (this.state.phase === 'restoring-preferences') {
 			this.state.message = restored ? 'RESTORING FROM TEMPO...' : 'LOADING DEFAULTS...';
 		}
 	}
 
-	/**
-	 * Set Tempo polling state with retry count
-	 * Shows current retry attempt and max retries in the message
-	 */
+	
+
+
+
 	setTempoPolling(retryCount: number, maxRetries: number): void {
 		this.state.phase = 'waiting-for-tempo';
 		this.state.progress = 10;
@@ -102,7 +102,7 @@ class LoadingPhaseStore {
 	setPhase(phase: LoadingPhase): void {
 		const config = phaseConfig[phase];
 
-		// Only advance, never go backwards
+		
 		if (config.progress <= this.state.progress && phase !== 'ready') {
 			return;
 		}
@@ -112,7 +112,7 @@ class LoadingPhaseStore {
 		this.state.phase = phase;
 		this.state.progress = config.progress;
 
-		// Use contextual message for restoring-preferences phase
+		
 		if (phase === 'restoring-preferences') {
 			this.state.message = this.state.restoredFromTempo ? 'RESTORING FROM TEMPO...' : 'LOADING DEFAULTS...';
 		} else {
@@ -121,10 +121,10 @@ class LoadingPhaseStore {
 	}
 
 	setProgress(progress: number): void {
-		// Only allow progress between 0-100
+		
 		const clampedProgress = Math.max(0, Math.min(100, progress));
 
-		// Only allow progress to increase
+		
 		if (clampedProgress < this.state.progress) {
 			return;
 		}
@@ -133,7 +133,7 @@ class LoadingPhaseStore {
 
 		this.state.progress = clampedProgress;
 
-		// Update phase based on progress
+		
 		if (clampedProgress >= 100) {
 			this.state.phase = 'ready';
 			this.state.message = 'READY!';

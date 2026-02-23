@@ -1,11 +1,11 @@
-/**
- * tRPC client interface types.
- *
- * Replaces direct imports from $lib/trpc/client.
- * Consumers inject their tRPC client instance via configuration.
- */
 
-/** TraceQL query input parameters. */
+
+
+
+
+
+
+
 export interface TraceQLQueryInput {
 	query: string;
 	startTime: Date;
@@ -13,7 +13,7 @@ export interface TraceQLQueryInput {
 	limit: number;
 }
 
-/** tRPC TraceQL response. */
+
 export interface TRPCTraceQLResponse {
 	spans: unknown[];
 	aggregations: {
@@ -32,7 +32,7 @@ export interface TRPCTraceQLResponse {
 	};
 }
 
-/** Interface for the tRPC traceql client. */
+
 export interface TraceQLClient {
 	traceql: {
 		query: {
@@ -41,7 +41,7 @@ export interface TraceQLClient {
 	};
 }
 
-/** Interface for observability tRPC client methods. */
+
 export interface ObservabilityClient {
 	ingestA11y(url: string, violations: unknown[], fingerprint?: unknown): Promise<void>;
 	ingestMetrics(url: string, metrics: unknown): Promise<void>;
@@ -54,10 +54,10 @@ export interface ObservabilityClient {
 	): Promise<void>;
 }
 
-/** Interface for fingerprint retrieval. */
+
 export type GetFingerprintFn = () => Promise<string>;
 
-/** Interface for contrast checking. */
+
 export interface ContrastViolation {
 	element: string;
 	foreground: string;

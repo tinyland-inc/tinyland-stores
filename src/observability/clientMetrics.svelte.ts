@@ -1,36 +1,36 @@
-/**
- * Client Metrics Observability Store
- *
- * Svelte 5 runes-based store for client-side performance metrics.
- * Tracks Core Web Vitals and custom metrics, streams via tRPC.
- *
- * DEPENDENCY INJECTION: The tRPC observability client must be provided
- * via configureObservabilityMetrics() before calling flush().
- *
- * Replaces: Socket.IO-based metrics streaming
- * Benefits: Type-safe, automatic batching, offline queue
- */
+
+
+
+
+
+
+
+
+
+
+
+
 
 import type { ObservabilityClient } from '../types/trpc.js';
 
 let _observabilityClient: ObservabilityClient | null = null;
 
-/**
- * Configure the observability client for metrics ingestion.
- * Must be called before metricsStore.flush().
- */
+
+
+
+
 export function configureObservabilityMetrics(client: ObservabilityClient): void {
 	_observabilityClient = client;
 }
 
 interface Metrics {
-	// Core Web Vitals
-	FCP?: number; // First Contentful Paint
-	LCP?: number; // Largest Contentful Paint
-	FID?: number; // First Input Delay
-	CLS?: number; // Cumulative Layout Shift
-	TTFB?: number; // Time to First Byte
-	// Custom metrics
+	
+	FCP?: number; 
+	LCP?: number; 
+	FID?: number; 
+	CLS?: number; 
+	TTFB?: number; 
+	
 	hydrationTime?: number;
 	interactionLatency?: number;
 }
@@ -48,10 +48,10 @@ interface MetricsState {
 	isCollecting: boolean;
 }
 
-/**
- * Create reactive metrics store
- * Uses $state rune for reactivity
- */
+
+
+
+
 function createMetricsStore() {
 	let state = $state<MetricsState>({
 		currentMetrics: {},
@@ -169,7 +169,7 @@ function createMetricsStore() {
 	};
 }
 
-/**
- * Singleton metrics store instance
- */
+
+
+
 export const metricsStore = createMetricsStore();

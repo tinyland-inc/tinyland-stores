@@ -1,8 +1,8 @@
-/**
- * Accessibility types used by the globalAccessibility store.
- *
- * Replaces imports from $lib/accessibility/types.
- */
+
+
+
+
+
 
 export interface EvaluationResult {
 	id: string;
@@ -40,10 +40,10 @@ export interface EvaluationConfig {
 	viewportOnly: boolean;
 }
 
-/**
- * Interface for the AccessibilityOrchestrator.
- * Consumers must provide an implementation that satisfies this contract.
- */
+
+
+
+
 export interface AccessibilityOrchestratorInterface {
 	start(): Promise<void>;
 	stop(): void;
@@ -55,9 +55,9 @@ export interface AccessibilityOrchestratorInterface {
 	};
 }
 
-/**
- * Factory function type for creating an AccessibilityOrchestrator.
- */
+
+
+
 export type AccessibilityOrchestratorFactory = (
 	config: EvaluationConfig,
 	onResults: (results: EvaluationResult[], stats: EvaluationStats) => void

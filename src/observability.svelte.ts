@@ -1,15 +1,15 @@
-/**
- * Observability Store
- *
- * Svelte store for managing application observability with OpenTelemetry,
- * performance monitoring, and error tracking.
- *
- * Uses Svelte legacy writable/derived stores (not runes) for broader compatibility.
- */
+
+
+
+
+
+
+
+
 
 import { writable, derived } from 'svelte/store';
 
-// Performance metrics interface
+
 interface PerformanceMetrics {
   pageLoad: number;
   firstContentfulPaint?: number;
@@ -21,7 +21,7 @@ interface PerformanceMetrics {
   ttfb?: number;
 }
 
-// Error tracking interface
+
 interface ErrorInfo {
   id: string;
   message: string;
@@ -35,7 +35,7 @@ interface ErrorInfo {
   context?: Record<string, any>;
 }
 
-// User behavior tracking interface
+
 interface UserBehavior {
   sessionId: string;
   userId?: string;
@@ -55,7 +55,7 @@ interface BehaviorEvent {
   data?: Record<string, any>;
 }
 
-// Observability state interface
+
 interface ObservabilityState {
   sessionId: string;
   userId?: string;
@@ -66,7 +66,7 @@ interface ObservabilityState {
   config: ObservabilityConfig;
 }
 
-// Observability configuration interface
+
 interface ObservabilityConfig {
   enablePerformanceMonitoring: boolean;
   enableErrorTracking: boolean;
@@ -79,7 +79,7 @@ interface ObservabilityConfig {
   apiKey?: string;
 }
 
-// Default configuration
+
 const defaultConfig: ObservabilityConfig = {
   enablePerformanceMonitoring: true,
   enableErrorTracking: true,
@@ -90,7 +90,7 @@ const defaultConfig: ObservabilityConfig = {
   sampleRate: 1.0
 };
 
-// Initial state
+
 function createInitialState(): ObservabilityState {
   const sessionId = `obs_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
 
@@ -116,10 +116,10 @@ function createInitialState(): ObservabilityState {
   };
 }
 
-// Create stores
+
 export const observabilityStore = writable<ObservabilityState>(createInitialState());
 
-// Derived stores
+
 export const isInitialized = derived(
   observabilityStore,
   ($state) => $state.isInitialized
@@ -155,9 +155,9 @@ export const errorCount = derived(
   ($errors) => $errors.length
 );
 
-/**
- * Initialize observability
- */
+
+
+
 export async function initObservability(config?: Partial<ObservabilityConfig>): Promise<void> {
   const state = createInitialState();
 

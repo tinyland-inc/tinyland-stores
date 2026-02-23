@@ -1,15 +1,15 @@
-/**
- * Global Accessibility Store (Svelte 5 Runes)
- *
- * Manages accessibility evaluation orchestration with:
- * - Backend-first observability (always-on evaluation)
- * - Buffer management with backpressure
- * - Connection monitoring
- * - Continuous evaluation loop
- *
- * DEPENDENCY INJECTION: The AccessibilityOrchestrator must be provided
- * via configureGlobalAccessibility() before calling init().
- */
+
+
+
+
+
+
+
+
+
+
+
+
 
 import { browser } from './env.js';
 import type {
@@ -20,20 +20,20 @@ import type {
   AccessibilityOrchestratorFactory
 } from './types/accessibility.js';
 
-// Re-export types for consumers
+
 export type { EvaluationResult, EvaluationStats, EvaluationConfig };
 
 let _orchestratorFactory: AccessibilityOrchestratorFactory | null = null;
 
-/**
- * Configure the accessibility orchestrator factory.
- * Must be called before globalAccessibility.init().
- */
+
+
+
+
 export function configureGlobalAccessibility(factory: AccessibilityOrchestratorFactory): void {
   _orchestratorFactory = factory;
 }
 
-// Global accessibility orchestrator store using Svelte 5 runes
+
 class GlobalAccessibilityStore {
   #orchestrator: AccessibilityOrchestratorInterface | null = null;
   #connectionStatus = $state<string>('Disconnected');

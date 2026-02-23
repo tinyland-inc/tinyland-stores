@@ -1,10 +1,10 @@
-/**
- * Loading Orchestrator Store - Svelte 5 reactive wrapper
- * Provides reactive state management using Svelte 5 runes
- *
- * DEPENDENCY INJECTION: The LoadingOrchestrator must be provided
- * via configureLoadingOrchestrator() before calling initialize().
- */
+
+
+
+
+
+
+
 
 import type {
 	LoadingOrchestratorConfig,
@@ -13,25 +13,25 @@ import type {
 	LoadingOrchestratorFactory
 } from './types/loading.js';
 
-// Re-export types for consumers
+
 export type { LoadingState, LoadingOrchestratorConfig };
 
 let _orchestratorFactory: LoadingOrchestratorFactory | null = null;
 
-/**
- * Configure the loading orchestrator factory.
- * Must be called before loadingOrchestratorStore.initialize().
- */
+
+
+
+
 export function configureLoadingOrchestrator(factory: LoadingOrchestratorFactory): void {
 	_orchestratorFactory = factory;
 }
 
-// Svelte 5 runes-based loading orchestrator store
+
 class LoadingOrchestratorStore {
 	private orchestrator: LoadingOrchestratorClass | null = null;
 	private config: LoadingOrchestratorConfig | null = null;
 
-	// Reactive state using Svelte 5 runes
+	
 	#state = $state<LoadingState>({
 		phase: 'initializing',
 		progress: 0,
@@ -50,7 +50,7 @@ class LoadingOrchestratorStore {
 	});
 
 	constructor() {
-		// Don't initialize orchestrator here - wait for explicit initialization
+		
 	}
 
 	private ensureOrchestrator(): LoadingOrchestratorClass {
@@ -65,18 +65,18 @@ class LoadingOrchestratorStore {
 			}
 			this.orchestrator = _orchestratorFactory(this.config);
 
-			// Subscribe to orchestrator state changes
+			
 			this.orchestrator.onStateChange((newState) => {
 				this.#state = { ...newState };
 			});
 
-			// Initialize with current state
+			
 			this.#state = { ...this.orchestrator.current };
 		}
 		return this.orchestrator;
 	}
 
-	// Getters for reactive state
+	
 	get state(): LoadingState {
 		return this.#state;
 	}
@@ -113,7 +113,7 @@ class LoadingOrchestratorStore {
 		return this.#state.metrics;
 	}
 
-	// Methods to interact with orchestrator
+	
 	async initialize(config?: LoadingOrchestratorConfig): Promise<void> {
 		if (config) {
 			this.config = config;
@@ -148,5 +148,5 @@ class LoadingOrchestratorStore {
 	}
 }
 
-// Export singleton instance
+
 export const loadingOrchestratorStore = new LoadingOrchestratorStore();

@@ -1,18 +1,18 @@
-/**
- * Theme Store (Svelte 5 Runes)
- *
- * Manages theme configuration, dark mode, and CSS loading with:
- * - OTel-first architecture (Tempo as settings database)
- * - localStorage fallback persistence
- * - System dark mode preference tracking
- * - Dynamic theme CSS loading via API
- * - Hot reload support in development
- */
+
+
+
+
+
+
+
+
+
+
 
 import { browser } from './env.js';
 import type { FingerprintSettings } from './types/fingerprint.js';
 
-// Theme configuration interface
+
 interface ThemeConfig {
   name: string;
   label?: string;
@@ -24,23 +24,23 @@ interface ThemeConfig {
   source?: string;
 }
 
-// Dark mode preference: 'light' | 'dark' | 'system'
+
 type DarkModePreference = 'light' | 'dark' | 'system';
 
-/**
- * Server settings for theme initialization (OTel-first architecture)
- * Passed from +layout.svelte via $page.data.fingerprintSettings
- */
+
+
+
+
 export interface ServerThemeSettings {
   theme: string;
   darkMode: DarkModePreference;
 }
 
-// Svelte 5 runes-based theme store
+
 class ThemeStore {
-  // Private state using runes
+  
   #currentTheme = $state<string>('trans');
-  #darkMode = $state<boolean>(true); // Default to dark mode
+  #darkMode = $state<boolean>(true); 
   #darkModePreference = $state<DarkModePreference>('system');
   #themes = $state<ThemeConfig[]>([]);
   #loadedThemes = $state<Set<string>>(new Set(['trans']));
@@ -49,7 +49,7 @@ class ThemeStore {
   #serverSettingsApplied = $state<boolean>(false);
   #mediaQueryCleanup: (() => void) | null = null;
 
-  // Default themes - trans is the primary theme with animated vectors
+  
   #defaultThemes: ThemeConfig[] = [
     {
       name: 'tinyland',
@@ -112,7 +112,7 @@ class ThemeStore {
     }
   ];
 
-  // Getters for reactive state
+  
   get currentTheme() { return this.#currentTheme; }
   get darkMode() { return this.#darkMode; }
   get darkModePreference() { return this.#darkModePreference; }
@@ -121,7 +121,7 @@ class ThemeStore {
   get initialized() { return this.#initialized; }
   get serverSettingsApplied() { return this.#serverSettingsApplied; }
 
-  // Derived values as class fields
+  
   currentThemeConfig = $derived(
     this.#themes.find(t => t.name === this.#currentTheme) ||
     this.#defaultThemes.find(t => t.name === this.#currentTheme) ||
@@ -136,7 +136,7 @@ class ThemeStore {
     this.#themes = [...this.#defaultThemes];
   }
 
-  // localStorage keys for fallback persistence
+  
   static readonly #STORAGE_KEY_THEME = 'tinyland:theme';
   static readonly #STORAGE_KEY_DARK_MODE = 'tinyland:darkMode';
 
@@ -152,7 +152,7 @@ class ThemeStore {
       fallbackTheme = localStorage.getItem(ThemeStore.#STORAGE_KEY_THEME);
       fallbackDarkMode = localStorage.getItem(ThemeStore.#STORAGE_KEY_DARK_MODE) as DarkModePreference | null;
     } catch {
-      // localStorage may be unavailable (private browsing, etc.)
+      
     }
 
     const defaultTheme = fallbackTheme || 'trans';
@@ -362,7 +362,7 @@ class ThemeStore {
     try {
       localStorage.setItem(ThemeStore.#STORAGE_KEY_DARK_MODE, preference);
     } catch {
-      // localStorage may be unavailable
+      
     }
 
     this.applyTheme(this.#currentTheme, this.#darkMode);
@@ -443,7 +443,7 @@ class ThemeStore {
       try {
         localStorage.setItem(ThemeStore.#STORAGE_KEY_THEME, themeName);
       } catch {
-        // localStorage may be unavailable
+        
       }
 
       setTimeout(() => {
@@ -485,7 +485,7 @@ class ThemeStore {
     try {
       localStorage.setItem(ThemeStore.#STORAGE_KEY_DARK_MODE, newPreference);
     } catch {
-      // localStorage may be unavailable
+      
     }
 
     window.dispatchEvent(new CustomEvent('dark-mode-change', {
@@ -611,5 +611,5 @@ class ThemeStore {
   }
 }
 
-// Export singleton instance
+
 export const themeStore = new ThemeStore();

@@ -1,8 +1,8 @@
-/**
- * Loading orchestrator types.
- *
- * Replaces imports from $lib/core/LoadingOrchestrator.
- */
+
+
+
+
+
 
 export interface LoadingState {
 	phase: string;
@@ -23,11 +23,11 @@ export interface LoadingState {
 }
 
 export interface LoadingOrchestratorConfig {
-	/** Timeout for each loading phase in ms */
+	
 	phaseTimeout?: number;
-	/** Whether to enable performance metrics collection */
+	
 	enableMetrics?: boolean;
-	/** Custom phase definitions */
+	
 	phases?: string[];
 }
 
@@ -43,7 +43,7 @@ export interface LoadingOrchestratorClass {
 	destroy(): void;
 }
 
-/**
- * Factory function type for creating a LoadingOrchestrator.
- */
+
+
+
 export type LoadingOrchestratorFactory = (config: LoadingOrchestratorConfig) => LoadingOrchestratorClass;

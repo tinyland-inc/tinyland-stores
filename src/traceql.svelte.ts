@@ -1,40 +1,40 @@
-/**
- * TraceQL Store (Svelte 5 Runes)
- *
- * Reactive store for TraceQL query execution with caching and auto-refresh.
- * Integrates with tRPC router for Grafana Tempo queries.
- *
- * DEPENDENCY INJECTION: The tRPC client must be provided
- * via configureTraceQL() before calling executeQuery().
- *
- * Features:
- * - Query state management (query text, time range, results, loading, error)
- * - Result caching with configurable TTL (default 30s)
- * - Auto-refresh with configurable intervals
- * - Manual refresh trigger
- * - Query history tracking
- *
- * @module traceql.svelte
- */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 import type { TRPCTraceQLResponse, TraceQLClient } from './types/trpc.js';
 
-// Re-export types for consumers
+
 export type { TRPCTraceQLResponse };
 
 let _trpcClient: TraceQLClient | null = null;
 
-/**
- * Configure the tRPC client for TraceQL queries.
- * Must be called before traceql.executeQuery().
- */
+
+
+
+
 export function configureTraceQL(client: TraceQLClient): void {
 	_trpcClient = client;
 }
 
-/**
- * Query state interface
- */
+
+
+
 interface QueryState {
 	query: string;
 	startTime: Date;
@@ -42,21 +42,21 @@ interface QueryState {
 	limit: number;
 }
 
-/**
- * Cached query result
- */
+
+
+
 interface CachedResult {
 	query: string;
 	startTime: Date;
 	endTime: Date;
 	result: TRPCTraceQLResponse;
 	cachedAt: Date;
-	ttl: number; // milliseconds
+	ttl: number; 
 }
 
-/**
- * Query history entry
- */
+
+
+
 export interface QueryHistoryEntry {
 	id: string;
 	query: string;
@@ -69,17 +69,17 @@ export interface QueryHistoryEntry {
 	error?: string;
 }
 
-/**
- * TraceQL Store Class
- *
- * Encapsulates all TraceQL query state and operations using Svelte 5 runes.
- */
+
+
+
+
+
 class TraceQLStore {
-	// ===== REACTIVE STATE (Svelte 5 Runes) =====
+	
 
 	private _queryState = $state<QueryState>({
 		query: '',
-		startTime: new Date(Date.now() - 3600000), // 1h ago
+		startTime: new Date(Date.now() - 3600000), 
 		endTime: new Date(),
 		limit: 100
 	});
@@ -98,12 +98,12 @@ class TraceQLStore {
 		totalItems: 0
 	});
 
-	// ===== CACHE MANAGEMENT =====
+	
 
 	private cache = new Map<string, CachedResult>();
 	private readonly DEFAULT_TTL_MS = 30000;
 
-	// ===== DERIVED STATE =====
+	
 
 	get isStale(): boolean {
 		return this._lastRefresh !== null &&
@@ -135,7 +135,7 @@ class TraceQLStore {
 		};
 	}
 
-	// ===== GETTERS =====
+	
 
 	get queryState(): QueryState {
 		return this._queryState;
@@ -169,7 +169,7 @@ class TraceQLStore {
 		return this._pagination;
 	}
 
-	// ===== CACHE OPERATIONS =====
+	
 
 	private getCacheKey(query: string, start: Date, end: Date): string {
 		return `${query}_${start.getTime()}_${end.getTime()}`;
@@ -212,7 +212,7 @@ class TraceQLStore {
 		this.cache.clear();
 	}
 
-	// ===== QUERY OPERATIONS =====
+	
 
 	async executeQuery(
 		query: string,
@@ -228,7 +228,7 @@ class TraceQLStore {
 
 		this._queryState = { query, startTime, endTime, limit };
 
-		// Check cache first
+		
 		const cached = this.getCachedResult(query, startTime, endTime);
 		if (cached) {
 			this._results = cached;
@@ -296,7 +296,7 @@ class TraceQLStore {
 		await this.executeQuery(query, startTime, endTime, this._queryState.limit);
 	}
 
-	// ===== AUTO-REFRESH =====
+	
 
 	startAutoRefresh(intervalMs: number = 30000): void {
 		this.stopAutoRefresh();
@@ -317,7 +317,7 @@ class TraceQLStore {
 		}
 	}
 
-	// ===== HISTORY MANAGEMENT =====
+	
 
 	private addToHistory(entry: QueryHistoryEntry): void {
 		this._history = [entry, ...this._history].slice(0, 50);
@@ -327,7 +327,7 @@ class TraceQLStore {
 		this._history = [];
 	}
 
-	// ===== PAGINATION =====
+	
 
 	setPage(page: number): void {
 		if (page >= 1 && page <= this._pagination.totalPages) {
@@ -355,7 +355,7 @@ class TraceQLStore {
 		await this.executeQuery(entry.query, entry.startTime, entry.endTime, entry.limit);
 	}
 
-	// ===== RESET =====
+	
 
 	clearResults(): void {
 		this._results = null;
@@ -378,12 +378,12 @@ class TraceQLStore {
 	}
 }
 
-/**
- * Singleton TraceQL store instance
- */
+
+
+
 export const traceql = new TraceQLStore();
 
-/**
- * Type exports for consumers
- */
+
+
+
 export type { QueryState };

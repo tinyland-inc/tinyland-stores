@@ -1,16 +1,16 @@
-/**
- * A11y Observability Store
- *
- * Svelte 5 runes-based store for a11y evaluation results.
- * Uses tRPC for reliable client->server streaming.
- *
- * DEPENDENCY INJECTION: The tRPC observability client, fingerprint function,
- * contrast checker, and OTel trace API must be provided via configureA11yStore()
- * before use.
- *
- * Replaces: Socket.IO-based a11y result streaming
- * Benefits: Type-safe, reliable, no WebSocket complexity
- */
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 import { browser } from '../env.js';
 import {
@@ -31,20 +31,20 @@ import type {
 	GetContrastCheckerFn
 } from '../types/trpc.js';
 
-// Re-export for consumers
+
 export type { ContrastViolation };
 
-/**
- * Injectable dependencies for the A11y store.
- */
+
+
+
 export interface A11yStoreDeps {
-	/** tRPC observability client for ingesting a11y data */
+	
 	observabilityClient: ObservabilityClient;
-	/** Function to get device fingerprint */
+	
 	getFingerprint: GetFingerprintFn;
-	/** Function to get a contrast checker instance */
+	
 	getContrastChecker: GetContrastCheckerFn;
-	/** Optional OTel trace API (defaults to no-op) */
+	
 	traceApi?: {
 		getTracer(name: string): {
 			startSpan(name: string): {
@@ -56,21 +56,21 @@ export interface A11yStoreDeps {
 			};
 		};
 	};
-	/** OTel SpanStatusCode enum values */
+	
 	spanStatusCode?: { OK: number; ERROR: number };
 }
 
 let _deps: A11yStoreDeps | null = null;
 
-/**
- * Configure the A11y store dependencies.
- * Must be called before the store auto-initializes.
- */
+
+
+
+
 export function configureA11yStore(deps: A11yStoreDeps): void {
 	_deps = deps;
 }
 
-/** A11y violation from accessibility evaluation */
+
 interface A11yViolation {
 	id: string;
 	impact: 'critical' | 'serious' | 'moderate' | 'minor';
@@ -116,10 +116,10 @@ interface A11yState {
 	isContrastScanning: boolean;
 }
 
-/**
- * Create reactive a11y store
- * Uses $state rune for reactivity
- */
+
+
+
+
 function createA11yStore() {
 	const loadedCircuitBreaker = loadCircuitBreakerState() || createCircuitBreaker();
 
@@ -155,17 +155,17 @@ function createA11yStore() {
 	const hasCritical = $derived(state.violations.some((v) => v.impact === 'critical'));
 	const hasSerious = $derived(state.violations.some((v) => v.impact === 'serious'));
 
-	/**
-	 * Queue violations for ingestion
-	 */
+	
+
+
 	function queueViolations(violations: A11yViolation[]) {
 		state.pendingQueue.push(...violations);
 		state.violations = [...state.violations, ...violations];
 	}
 
-	/**
-	 * Flush pending violations to server via tRPC
-	 */
+	
+
+
 	async function flush() {
 		if (state.pendingQueue.length === 0) return;
 		if (!_deps) {
@@ -257,9 +257,9 @@ function createA11yStore() {
 		}
 	}
 
-	/**
-	 * Run a11y evaluation and send results
-	 */
+	
+
+
 	async function evaluate(element: HTMLElement = document.body) {
 		if (isDisabled()) {
 			console.debug('[A11y] Monitoring disabled for this fingerprint');
@@ -294,9 +294,9 @@ function createA11yStore() {
 		}
 	}
 
-	/**
-	 * Scan page for contrast violations
-	 */
+	
+
+
 	async function scanContrast(targetLevel: 'aa' | 'aaa' = 'aa') {
 		if (!browser || state.isContrastScanning || !_deps) return;
 
@@ -520,9 +520,9 @@ function createA11yStore() {
 	};
 }
 
-/**
- * Singleton a11y store instance with SSR safety
- */
+
+
+
 let _storeInstance: ReturnType<typeof createA11yStore> | null = null;
 
 function getA11yStore(): ReturnType<typeof createA11yStore> {
@@ -538,9 +538,9 @@ function getA11yStore(): ReturnType<typeof createA11yStore> {
 	return _storeInstance;
 }
 
-/**
- * Mock store for SSR (all methods are no-ops)
- */
+
+
+
 function createMockA11yStore(): ReturnType<typeof createA11yStore> {
 	const noop = () => {};
 	const noopAsync = async () => {};
@@ -581,8 +581,8 @@ function createMockA11yStore(): ReturnType<typeof createA11yStore> {
 	};
 }
 
-/**
- * Export singleton instance
- * Safe for both SSR and client-side usage
- */
+
+
+
+
 export const a11yStore = getA11yStore();

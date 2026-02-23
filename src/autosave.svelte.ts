@@ -1,12 +1,12 @@
-/**
- * AutoSave Store (Svelte 5 Runes)
- *
- * Manages draft persistence and synchronization for admin content editing.
- * Integrates with useEditorQueue for debounced, serial execution.
- *
- * IMPORTANT: This store now uses the editor queue for all save operations
- * to prevent race conditions during rapid editing.
- */
+
+
+
+
+
+
+
+
+
 
 import { useEditorQueue } from '@tummycrypt/tinyland-composables';
 
@@ -35,10 +35,10 @@ class AutoSaveStore {
 		syncEnabled: false
 	});
 
-	// Editor queue for debounced operations (1.5s default)
+	
 	private _queue = useEditorQueue({ debounceMs: 1500 });
 
-	// Getters
+	
 	get drafts(): Draft[] {
 		return Array.from(this._state.drafts.values());
 	}
@@ -64,14 +64,14 @@ class AutoSaveStore {
 		return this._state.saveStatus === 'saved';
 	}
 
-	/**
-	 * Save draft to server (queued and debounced)
-	 *
-	 * This method now uses the editor queue to prevent race conditions
-	 * during rapid editing. Saves are automatically debounced by 1.5s.
-	 */
+	
+
+
+
+
+
 	saveDraft(draftId: string, content: any, type: Draft['type']): string {
-		// Update local state immediately for optimistic UI
+		
 		this._state.drafts.set(draftId, {
 			id: draftId,
 			type,
@@ -80,10 +80,10 @@ class AutoSaveStore {
 			userId: this._state.drafts.get(draftId)?.userId
 		});
 
-		// Queue the save operation (will be debounced)
+		
 		return this._queue.enqueue({
 			type: 'autosave',
-			priority: 0, // Low priority (autosaves)
+			priority: 0, 
 			execute: async () => {
 				this._state.saveStatus = 'saving';
 				this._state.lastError = null;
@@ -102,7 +102,7 @@ class AutoSaveStore {
 				this._state.drafts.set(draftId, savedDraft);
 				this._state.saveStatus = 'saved';
 
-				// Auto-reset to idle after 2 seconds
+				
 				setTimeout(() => {
 					if (this._state.saveStatus === 'saved') {
 						this._state.saveStatus = 'idle';
@@ -120,9 +120,9 @@ class AutoSaveStore {
 		});
 	}
 
-	/**
-	 * Load draft from server
-	 */
+	
+
+
 	async loadDraft(draftId: string): Promise<Draft | null> {
 		try {
 			const response = await fetch(`/api/drafts/${draftId}`);
@@ -146,9 +146,9 @@ class AutoSaveStore {
 		}
 	}
 
-	/**
-	 * Delete draft from server
-	 */
+	
+
+
 	async deleteDraft(draftId: string): Promise<boolean> {
 		try {
 			const response = await fetch(`/api/drafts/${draftId}`, {
@@ -173,9 +173,9 @@ class AutoSaveStore {
 		}
 	}
 
-	/**
-	 * List all drafts for current user
-	 */
+	
+
+
 	async listDrafts(): Promise<Draft[]> {
 		try {
 			const response = await fetch('/api/drafts');
@@ -199,27 +199,27 @@ class AutoSaveStore {
 		}
 	}
 
-	/** Set current draft ID */
+	
 	setCurrentDraft(draftId: string | null): void {
 		this._state.currentDraftId = draftId;
 	}
 
-	/** Enable/disable sync */
+	
 	setSyncEnabled(enabled: boolean): void {
 		this._state.syncEnabled = enabled;
 	}
 
-	/** Clear error */
+	
 	clearError(): void {
 		this._state.lastError = null;
 	}
 
-	/** Reset save status */
+	
 	resetStatus(): void {
 		this._state.saveStatus = 'idle';
 	}
 
-	/** Get save status message for UI */
+	
 	getStatusMessage(): string {
 		switch (this._state.saveStatus) {
 			case 'saving':
@@ -233,12 +233,12 @@ class AutoSaveStore {
 		}
 	}
 
-	/**
-	 * Force save current draft immediately
-	 * Used when component is unmounting to ensure no data loss
-	 *
-	 * This flushes the editor queue to execute all pending operations immediately.
-	 */
+	
+
+
+
+
+
 	async forceSave(): Promise<void> {
 		if (!this._state.currentDraftId) {
 			return;
@@ -256,7 +256,7 @@ class AutoSaveStore {
 		}
 	}
 
-	/** Get queue status for debugging */
+	
 	get queueStatus() {
 		return {
 			pending: this._queue.pending,
@@ -269,9 +269,9 @@ class AutoSaveStore {
 
 export const autoSaveStore = new AutoSaveStore();
 
-/**
- * Get save status with styling for UI display
- */
+
+
+
 export function getSaveStatus(): { text: string; class: string } {
 	const status = autoSaveStore.saveStatus;
 	const message = autoSaveStore.getStatusMessage();

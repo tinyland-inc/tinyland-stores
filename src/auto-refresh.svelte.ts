@@ -1,17 +1,17 @@
-/**
- * Auto-Refresh Store (Svelte 5 Runes)
- *
- * Manages auto-refresh configuration for queries with:
- * - Priority-based intervals
- * - Exponential backoff on failures
- * - Background tab optimization
- */
+
+
+
+
+
+
+
+
 
 import { browser } from './env.js';
 
-/**
- * Auto-refresh configuration for a single query
- */
+
+
+
 export interface RefreshConfig {
 	id: string;
 	query: string;
@@ -24,43 +24,43 @@ export interface RefreshConfig {
 	onError?: (error: Error) => void;
 }
 
-/**
- * Refresh orchestrator state
- */
+
+
+
 let activeRefreshers = $state<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 let pausedRefreshers = $state<Set<string>>(new Set());
 let errorCounts = $state<Map<string, number>>(new Map());
 
-/**
- * Get recommended interval based on priority level
- */
+
+
+
 export function getIntervalByPriority(priority: 'high' | 'medium' | 'low'): number {
 	switch (priority) {
 		case 'high':
-			return 15000; // 15 seconds
+			return 15000; 
 		case 'medium':
-			return 30000; // 30 seconds
+			return 30000; 
 		case 'low':
-			return 60000; // 1 minute
+			return 60000; 
 	}
 }
 
-/**
- * Register a query for auto-refresh
- */
+
+
+
 export function registerRefresh(config: RefreshConfig): void {
-	// Stop existing refresher if any
+	
 	stopRefresh(config.id);
 
 	if (!config.enabled) return;
 
-	// Start interval
+	
 	const intervalId = setInterval(async () => {
 		if (pausedRefreshers.has(config.id)) return;
 
 		try {
 			await config.onRefresh();
-			errorCounts.set(config.id, 0); // Reset error count on success
+			errorCounts.set(config.id, 0); 
 		} catch (error) {
 			const count = (errorCounts.get(config.id) || 0) + 1;
 			errorCounts.set(config.id, count);
@@ -69,11 +69,11 @@ export function registerRefresh(config: RefreshConfig): void {
 				config.onError(error as Error);
 			}
 
-			// Exponential backoff: pause for 2^count * intervalMs (max 5 minutes)
+			
 			if (count >= 3) {
 				const backoffMs = Math.min(
 					Math.pow(2, count) * config.intervalMs,
-					300000 // 5 minutes max
+					300000 
 				);
 
 				console.warn(
@@ -92,9 +92,9 @@ export function registerRefresh(config: RefreshConfig): void {
 	);
 }
 
-/**
- * Stop auto-refresh for a query
- */
+
+
+
 export function stopRefresh(id: string): void {
 	const intervalId = activeRefreshers.get(id);
 	if (intervalId) {
@@ -106,25 +106,25 @@ export function stopRefresh(id: string): void {
 	pausedRefreshers.delete(id);
 }
 
-/**
- * Pause auto-refresh (doesn't clear interval, just skips execution)
- */
+
+
+
 export function pauseRefresh(id: string): void {
 	pausedRefreshers.add(id);
 	console.log(`[Auto-Refresh] Paused query ${id}`);
 }
 
-/**
- * Resume auto-refresh
- */
+
+
+
 export function resumeRefresh(id: string): void {
 	pausedRefreshers.delete(id);
 	console.log(`[Auto-Refresh] Resumed query ${id}`);
 }
 
-/**
- * Pause all refreshers
- */
+
+
+
 export function pauseAll(): void {
 	for (const id of activeRefreshers.keys()) {
 		pauseRefresh(id);
@@ -132,17 +132,17 @@ export function pauseAll(): void {
 	console.log('[Auto-Refresh] Paused all refreshers');
 }
 
-/**
- * Resume all refreshers
- */
+
+
+
 export function resumeAll(): void {
 	pausedRefreshers.clear();
 	console.log('[Auto-Refresh] Resumed all refreshers');
 }
 
-/**
- * Stop all refreshers
- */
+
+
+
 export function stopAll(): void {
 	for (const id of activeRefreshers.keys()) {
 		stopRefresh(id);
@@ -150,18 +150,18 @@ export function stopAll(): void {
 	console.log('[Auto-Refresh] Stopped all refreshers');
 }
 
-/**
- * Manually trigger refresh for a specific query
- */
+
+
+
 export async function triggerRefresh(id: string): Promise<void> {
 	console.log(`[Auto-Refresh] Manual trigger for query ${id}`);
-	// Note: This requires access to the config's onRefresh callback
-	// Consumers should call the onRefresh callback directly for manual triggers
+	
+	
 }
 
-/**
- * Get current refresh status
- */
+
+
+
 export function getRefreshStatus(): {
 	active: string[];
 	paused: string[];
@@ -174,9 +174,9 @@ export function getRefreshStatus(): {
 	};
 }
 
-/**
- * Background tab optimization: pause when hidden, resume when visible
- */
+
+
+
 if (browser) {
 	document.addEventListener('visibilitychange', () => {
 		if (document.hidden) {
@@ -188,7 +188,7 @@ if (browser) {
 		}
 	});
 
-	// Cleanup on page unload
+	
 	window.addEventListener('beforeunload', () => {
 		stopAll();
 	});
