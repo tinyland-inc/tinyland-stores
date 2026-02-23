@@ -1,14 +1,14 @@
-/**
- * Vitest Configuration for @tummycrypt/tinyland-stores (Svelte variant)
- *
- * Works in three modes:
- *   1. Standalone:  cd packages/tinyland-stores && pnpm test
- *   2. Workspace:   vitest run --project=tinyland-stores (from root)
- *   3. Bazel:       bazel test //packages/tinyland-stores:test
- *
- * Uses jsdom environment since stores depend on browser APIs
- * (localStorage, document, window).
- */
+
+
+
+
+
+
+
+
+
+
+
 
 import { defineConfig } from 'vitest/config';
 import { fileURLToPath } from 'node:url';
