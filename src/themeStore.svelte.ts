@@ -43,7 +43,6 @@ class ThemeStore {
   #darkMode = $state<boolean>(true); 
   #darkModePreference = $state<DarkModePreference>('system');
   #themes = $state<ThemeConfig[]>([]);
-  #loadedThemes = $state<Set<string>>(new Set(['trans']));
   #isLoading = $state<boolean>(false);
   #initialized = $state<boolean>(false);
   #serverSettingsApplied = $state<boolean>(false);
@@ -54,24 +53,24 @@ class ThemeStore {
     {
       name: 'tinyland',
       label: 'Tinyland',
-      description: 'Default theme with soft purple tones and animated vectors',
-      colors: ['oklch(54% 0.20 280deg)', 'oklch(58% 0.19 330deg)', 'oklch(52% 0.17 185deg)'],
+      description: 'Soft violet, blue, and pink glow',
+      colors: ['#8B5CF6', '#3B82F6', '#EC4899'],
       source: 'custom',
       hasVectors: true
     },
     {
       name: 'trans',
       label: 'Trans Pride',
-      description: 'Trans pride flag colors with animated vector backgrounds',
-      colors: ['#5BCEFA', '#F5A9B8', '#FFFFFF', '#F5A9B8', '#5BCEFA'],
+      description: 'Soft trans pride palette',
+      colors: ['#5BCEFA', '#F5A9B8', '#FFFFFF'],
       source: 'custom',
       hasVectors: true
     },
     {
       name: 'pride',
       label: 'Pride Rainbow',
-      description: 'Classic 6-stripe pride flag with animated vectors',
-      colors: ['#E40303', '#FF8C00', '#FFD700', '#008026', '#004CFF', '#732982'],
+      description: 'Rainbow signal colors with diffuse vectors',
+      colors: ['#E40303', '#FF8C00', '#732982'],
       source: 'custom',
       hasVectors: true
     },
@@ -79,36 +78,40 @@ class ThemeStore {
       name: 'high-contrast',
       label: 'High Contrast',
       description: 'WCAG AAA compliant for maximum readability',
-      colors: ['#000000', '#FFFFFF', '#0040FF', '#00FF00', '#FFCC00'],
+      colors: ['#000000', '#FFFFFF', '#0040FF'],
       source: 'custom'
     },
     {
       name: 'cerberus',
       label: 'Cerberus',
-      description: 'Skeleton v4 dark theme with purple accents',
-      colors: ['#7c3aed', '#a78bfa', '#1e1b4b', '#312e81', '#4f46e5'],
-      source: 'skeleton'
+      description: 'Dark indigo base with bright violet accents',
+      colors: ['#7C3AED', '#A78BFA', '#312E81'],
+      source: 'skeleton',
+      hasVectors: true
     },
     {
       name: 'rose',
       label: 'Rose',
-      description: 'Skeleton v4 warm rose and pink palette',
-      colors: ['#e11d48', '#fb7185', '#fda4af', '#fff1f2', '#be123c'],
-      source: 'skeleton'
+      description: 'Warm rose and apricot highlights',
+      colors: ['#FB7185', '#FDBA74', '#A78BFA'],
+      source: 'skeleton',
+      hasVectors: true
     },
     {
       name: 'catppuccin',
       label: 'Catppuccin',
-      description: 'Soothing pastel theme with warm tones',
-      colors: ['#cba6f7', '#f5c2e7', '#94e2d5', '#fab387', '#1e1e2e'],
-      source: 'skeleton'
+      description: 'Pastel mauve, peach, and mint',
+      colors: ['#CBA6F7', '#F5C2E7', '#94E2D5'],
+      source: 'skeleton',
+      hasVectors: true
     },
     {
       name: 'pine',
       label: 'Pine',
-      description: 'Forest green theme with natural earth tones',
-      colors: ['#22c55e', '#86efac', '#166534', '#14532d', '#f0fdf4'],
-      source: 'skeleton'
+      description: 'Forest greens with bright moss accents',
+      colors: ['#22C55E', '#86EFAC', '#166534'],
+      source: 'skeleton',
+      hasVectors: true
     }
   ];
 
@@ -156,7 +159,7 @@ class ThemeStore {
     }
 
     const defaultTheme = fallbackTheme || 'trans';
-    const defaultDarkModePreference: DarkModePreference = fallbackDarkMode || 'dark';
+    const defaultDarkModePreference: DarkModePreference = fallbackDarkMode || 'system';
 
     this.#darkModePreference = defaultDarkModePreference;
     this.#darkMode = this.#calculateDarkMode();
@@ -167,22 +170,9 @@ class ThemeStore {
 
     this.#currentTheme = validTheme;
 
-    const currentDataTheme = document.documentElement.getAttribute('data-theme');
-    const hasDarkClass = document.documentElement.classList.contains('dark');
-
-    if (currentDataTheme !== validTheme || hasDarkClass !== this.#darkMode) {
-      await this.loadThemeCSS(validTheme);
-      this.applyTheme(validTheme, this.#darkMode);
-    } else {
-      await this.loadThemeCSS(validTheme);
-    }
+    this.applyTheme(validTheme, this.#darkMode);
 
     this.logThemeState();
-    this.loadAvailableThemes();
-
-    if ((window as any).__DEV__) {
-      this.setupHotReload();
-    }
   }
 
   async initFromServerSettings(settings: ServerThemeSettings) {
@@ -204,7 +194,6 @@ class ThemeStore {
 
     this.#setupSystemPreferenceListener();
 
-    await this.loadThemeCSS(validTheme);
     this.applyTheme(validTheme, this.#darkMode);
     this.#initialized = true;
 
@@ -215,103 +204,10 @@ class ThemeStore {
     });
 
     this.logThemeState();
-    this.loadAvailableThemes();
   }
 
   resetServerSettings(): void {
     this.#serverSettingsApplied = false;
-  }
-
-  private async loadThemeCSS(themeName: string) {
-    if (!browser) return;
-
-    console.log('[ThemeStore.loadThemeCSS] Loading CSS for:', themeName);
-
-    if (this.#loadedThemes.has(themeName)) {
-      console.log('[ThemeStore.loadThemeCSS] Theme already loaded, activating style tag');
-      const existingStyle = document.querySelector(`style[data-theme-css="${themeName}"]`);
-      if (existingStyle) {
-        existingStyle.removeAttribute('disabled');
-        document.querySelectorAll('style[data-theme-css]').forEach(style => {
-          if (style !== existingStyle) {
-            style.setAttribute('disabled', 'true');
-          }
-        });
-        console.log('[ThemeStore.loadThemeCSS] Activated existing style tag for:', themeName);
-        return;
-      }
-      console.warn('[ThemeStore.loadThemeCSS] Theme marked as loaded but no style tag found!');
-    }
-
-    try {
-      this.#isLoading = true;
-
-      const timestamp = (window as any).__DEV__ ? `?t=${Date.now()}` : '';
-      const url = `/api/theme-css/${themeName}${timestamp}`;
-      console.log('[ThemeStore.loadThemeCSS] Fetching from:', url);
-
-      const response = await fetch(url, {
-        cache: (window as any).__DEV__ ? 'no-store' : 'force-cache',
-      });
-
-      if (!response.ok) {
-        console.error('[ThemeStore.loadThemeCSS] Fetch failed:', response.status, response.statusText);
-        throw new Error(`Failed to load theme ${themeName}: ${response.status}`);
-      }
-
-      const css = await response.text();
-      console.log('[ThemeStore.loadThemeCSS] Fetched CSS length:', css.length, 'chars');
-
-      const style = document.createElement('style');
-      style.setAttribute('data-theme-css', themeName);
-      style.textContent = css;
-      document.head.appendChild(style);
-      console.log('[ThemeStore.loadThemeCSS] Injected style tag into <head>');
-
-      document.querySelectorAll('style[data-theme-css]').forEach(otherStyle => {
-        if (otherStyle !== style) {
-          otherStyle.setAttribute('disabled', 'true');
-        }
-      });
-
-      this.#loadedThemes = new Set([...this.#loadedThemes, themeName]);
-      console.log('[ThemeStore.loadThemeCSS] Successfully loaded and activated:', themeName);
-    } catch (err) {
-      console.error(`Failed to load theme CSS for ${themeName}:`, err);
-    } finally {
-      this.#isLoading = false;
-    }
-  }
-
-  #themesLoaded = false;
-
-  private async loadAvailableThemes() {
-    if (!browser || this.#themesLoaded) return;
-
-    try {
-      const response = await fetch('/api/themes', {
-        cache: 'default'
-      });
-
-      if (!response.ok) {
-        console.warn(`Themes API responded with ${response.status}: ${response.statusText}`);
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      const contentType = response.headers.get('content-type');
-      if (!contentType?.includes('application/json')) {
-        console.warn('Themes API returned non-JSON content:', contentType);
-        throw new Error('Invalid response format');
-      }
-
-      const themes: ThemeConfig[] = await response.json();
-      this.#themes = themes;
-      this.#themesLoaded = true;
-    } catch (err) {
-      console.error('Failed to load available themes:', err);
-      this.#themes = [...this.#defaultThemes];
-      this.#themesLoaded = true;
-    }
   }
 
   #calculateDarkMode(): boolean {
@@ -404,41 +300,19 @@ class ThemeStore {
   }
 
   async setTheme(themeName: string) {
-    console.log('[ThemeStore.setTheme] Called with:', themeName, {
-      currentTheme: this.#currentTheme,
-      isLoading: this.#isLoading,
-      browser
-    });
-
     if (!browser || this.#currentTheme === themeName) {
-      console.log('[ThemeStore.setTheme] Skipping - same theme or not in browser');
       return;
     }
 
-    if (this.#isLoading) {
-      console.log('[ThemeStore.setTheme] Skipping - already loading');
+    if (!this.#defaultThemes.some(t => t.name === themeName)) {
       return;
     }
 
     try {
-      console.log('[ThemeStore.setTheme] Starting theme switch to:', themeName);
-      const loadPromise = this.loadThemeCSS(themeName);
-
       document.documentElement.classList.add('theme-transitioning');
 
-      await loadPromise;
-      console.log('[ThemeStore.setTheme] CSS loaded for:', themeName);
-
       this.#currentTheme = themeName;
-      console.log('[ThemeStore.setTheme] Updated internal state to:', themeName);
-
       this.applyTheme(themeName, this.#darkMode);
-      console.log('[ThemeStore.setTheme] Applied to DOM:', {
-        theme: themeName,
-        darkMode: this.#darkMode,
-        dataTheme: document.documentElement.getAttribute('data-theme'),
-        themeClass: document.documentElement.className.match(/theme-\S+/)?.[0]
-      });
 
       try {
         localStorage.setItem(ThemeStore.#STORAGE_KEY_THEME, themeName);
@@ -453,7 +327,6 @@ class ThemeStore {
       window.dispatchEvent(new CustomEvent('theme-change', {
         detail: { theme: themeName }
       }));
-      console.log('[ThemeStore.setTheme] Theme change complete, event dispatched');
 
       this.logThemeState();
     } catch (err) {
@@ -497,20 +370,6 @@ class ThemeStore {
     }, 300);
   }
 
-  private setupHotReload() {
-    window.addEventListener('theme-refresh', async (event: any) => {
-      const { theme } = event.detail || {};
-      if (theme === this.#currentTheme) {
-        const existingStyle = document.querySelector(`style[data-theme-css="${theme}"]`);
-        if (existingStyle) {
-          existingStyle.remove();
-        }
-        this.#loadedThemes.delete(theme);
-        await this.loadThemeCSS(theme);
-      }
-    });
-  }
-
   getThemeByName(name: string): ThemeConfig | undefined {
     return this.#themes.find(t => t.name === name);
   }
@@ -519,12 +378,11 @@ class ThemeStore {
     console.log('[ThemeStore] Current state:', {
       currentTheme: this.#currentTheme,
       darkMode: this.#darkMode,
-      hasVectors: ['trans'].includes(this.#currentTheme),
+      hasVectors: this.hasVectors,
       isHighContrast: this.#currentTheme === 'high-contrast',
       isLoading: this.#isLoading,
       initialized: this.#initialized,
-      availableThemes: this.#themes.map(t => t.name),
-      loadedThemes: Array.from(this.#loadedThemes)
+      availableThemes: this.#themes.map(t => t.name)
     });
   }
 
@@ -581,6 +439,10 @@ class ThemeStore {
 
   subscribeDarkMode(callback: (value: boolean) => void) {
     return this.#subscribeToRune(() => this.#darkMode, callback);
+  }
+
+  subscribeDarkModePreference(callback: (value: DarkModePreference) => void) {
+    return this.#subscribeToRune(() => this.#darkModePreference, callback);
   }
 
   subscribeThemes(callback: (value: ThemeConfig[]) => void) {
