@@ -87,7 +87,7 @@ npm_package(
         ":tinyland_stores",
     ],
     package = "@tummycrypt/tinyland-stores",
-    version = "0.2.2",
+    version = "0.2.3",
     visibility = ["//visibility:public"],
 )
 
