@@ -48,8 +48,8 @@
     "url": "git+https://github.com/tinyland-inc/tinyland-stores.git"
   },
   "dependencies": {
-    "@tummycrypt/tinyland-composables": "workspace:^",
-    "@tummycrypt/tinyland-types": "workspace:^"
+    "@tummycrypt/tinyland-composables": "^0.2.2",
+    "@tummycrypt/tinyland-types": "^0.2.2"
   },
   "devDependencies": {
     "@fast-check/vitest": "^0.2.4",
