@@ -5,7 +5,6 @@ Dual-mode build for packages containing .svelte.ts files (stores with runes).
 Uses svelte-package instead of plain tsc.
 
   Standalone: cd packages/tinyland-stores && pnpm build
-  Monorepo:   bazel build //packages/tinyland-stores/...
 """
 
 load("@aspect_rules_js//js:defs.bzl", "js_library", "js_run_binary")
