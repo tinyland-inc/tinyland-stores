@@ -62,8 +62,7 @@
     "svelte-check": "^4.0.0",
     "typescript": "^5.0.0",
     "vitest": "^4.0.0",
-    "publint": "^0.3.18",
-    "@tummycrypt/tinyland-composables @tummycrypt/tinyland-types": "^0.2.2"
+    "publint": "^0.3.18"
   },
   "peerDependencies": {
     "svelte": "^5.0.0",
