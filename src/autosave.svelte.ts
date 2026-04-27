@@ -9,14 +9,11 @@
 
 
 import { useEditorQueue } from '@tummycrypt/tinyland-composables';
-
-interface Draft {
-	id: string;
-	type: 'post' | 'event' | 'profile';
-	content: any;
-	lastSaved: number;
-	userId?: string;
-}
+import {
+	createAutoSaveApiTransport,
+	type AutoSaveTransport,
+	type Draft
+} from './autosave-transport.js';
 
 interface AutoSaveState {
 	drafts: Map<string, Draft>;
@@ -27,6 +24,8 @@ interface AutoSaveState {
 }
 
 class AutoSaveStore {
+	constructor(private readonly _transport: AutoSaveTransport = createAutoSaveApiTransport()) {}
+
 	private _state = $state<AutoSaveState>({
 		drafts: new Map(),
 		currentDraftId: null,
@@ -70,7 +69,7 @@ class AutoSaveStore {
 
 
 
-	saveDraft(draftId: string, content: any, type: Draft['type']): string {
+	saveDraft(draftId: string, content: unknown, type: Draft['type']): string {
 		
 		this._state.drafts.set(draftId, {
 			id: draftId,
@@ -88,17 +87,7 @@ class AutoSaveStore {
 				this._state.saveStatus = 'saving';
 				this._state.lastError = null;
 
-				const response = await fetch('/api/drafts', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ draftId, content, type })
-				});
-
-				if (!response.ok) {
-					throw new Error(`Failed to save draft: ${response.statusText}`);
-				}
-
-				const savedDraft: Draft = await response.json();
+				const savedDraft = await this._transport.saveDraft(draftId, content, type);
 				this._state.drafts.set(draftId, savedDraft);
 				this._state.saveStatus = 'saved';
 
@@ -125,16 +114,10 @@ class AutoSaveStore {
 
 	async loadDraft(draftId: string): Promise<Draft | null> {
 		try {
-			const response = await fetch(`/api/drafts/${draftId}`);
-
-			if (!response.ok) {
-				if (response.status === 404) {
-					return null;
-				}
-				throw new Error(`Failed to load draft: ${response.statusText}`);
+			const draft = await this._transport.loadDraft(draftId);
+			if (!draft) {
+				return null;
 			}
-
-			const draft: Draft = await response.json();
 			this._state.drafts.set(draftId, draft);
 			this._state.currentDraftId = draftId;
 
@@ -151,13 +134,7 @@ class AutoSaveStore {
 
 	async deleteDraft(draftId: string): Promise<boolean> {
 		try {
-			const response = await fetch(`/api/drafts/${draftId}`, {
-				method: 'DELETE'
-			});
-
-			if (!response.ok) {
-				throw new Error(`Failed to delete draft: ${response.statusText}`);
-			}
+			await this._transport.deleteDraft(draftId);
 
 			this._state.drafts.delete(draftId);
 
@@ -178,13 +155,7 @@ class AutoSaveStore {
 
 	async listDrafts(): Promise<Draft[]> {
 		try {
-			const response = await fetch('/api/drafts');
-
-			if (!response.ok) {
-				throw new Error(`Failed to list drafts: ${response.statusText}`);
-			}
-
-			const drafts: Draft[] = await response.json();
+			const drafts = await this._transport.listDrafts();
 
 			this._state.drafts.clear();
 			for (const draft of drafts) {
@@ -267,14 +238,20 @@ class AutoSaveStore {
 	}
 }
 
-export const autoSaveStore = new AutoSaveStore();
+export function createAutoSaveStore(transport?: AutoSaveTransport): AutoSaveStore {
+	return new AutoSaveStore(transport);
+}
+
+export const autoSaveStore = createAutoSaveStore();
 
 
 
 
-export function getSaveStatus(): { text: string; class: string } {
-	const status = autoSaveStore.saveStatus;
-	const message = autoSaveStore.getStatusMessage();
+export function getSaveStatus(
+	store: Pick<AutoSaveStore, 'saveStatus' | 'getStatusMessage'> = autoSaveStore
+): { text: string; class: string } {
+	const status = store.saveStatus;
+	const message = store.getStatusMessage();
 
 	let className = 'text-surface-600 dark:text-surface-400';
 

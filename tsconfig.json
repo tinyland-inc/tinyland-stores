@@ -1,6 +1,23 @@
 {
-  "extends": "../tsconfig.base.json",
+  "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": false,
     "outDir": "./dist",
     "rootDir": "./src",
     "noEmit": true,
@@ -9,8 +26,17 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "verbatimModuleSyntax": true,
-    "types": ["svelte"]
+    "types": [
+      "svelte"
+    ]
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ]
 }

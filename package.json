@@ -1,6 +1,6 @@
 {
   "name": "@tummycrypt/tinyland-stores",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "description": "Svelte 5 reactive stores for authentication, theming, CSRF, observability, and accessibility state management",
   "type": "module",
   "license": "Zlib AND LicenseRef-Tinyland-Proprietary",
@@ -27,7 +27,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "svelte-check --tsconfig ./tsconfig.json",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "pnpm build && pnpm check:package",
+    "check:package": "publint"
   },
   "keywords": [
     "svelte5",
@@ -44,22 +45,24 @@
   "author": "Tinyland.dev",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tinyland-inc/tinyland.dev",
-    "directory": "packages/tinyland-stores"
+    "url": "git+https://github.com/tinyland-inc/tinyland-stores.git"
   },
   "dependencies": {
-    "@tummycrypt/tinyland-composables": "workspace:*",
-    "@tummycrypt/tinyland-types": "workspace:*"
+    "@tummycrypt/tinyland-composables": "workspace:^",
+    "@tummycrypt/tinyland-types": "workspace:^"
   },
   "devDependencies": {
     "@fast-check/vitest": "^0.2.4",
     "@sveltejs/package": "^2.3.0",
     "@types/node": "^22.0.0",
+    "axe-core": "^4.10.0",
     "fast-check": "^4.3.0",
+    "happy-dom": "^17.0.0",
     "svelte": "^5.0.0",
     "svelte-check": "^4.0.0",
     "typescript": "^5.0.0",
-    "vitest": "^4.0.0"
+    "vitest": "^4.0.0",
+    "publint": "^0.3.18"
   },
   "peerDependencies": {
     "svelte": "^5.0.0",
@@ -75,7 +78,11 @@
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
-    "access": "public",
-    "provenance": true
+    "access": "public"
+  },
+  "packageManager": "pnpm@10.13.1",
+  "homepage": "https://github.com/tinyland-inc/tinyland-stores",
+  "bugs": {
+    "url": "https://github.com/tinyland-inc/tinyland-stores/issues"
   }
 }

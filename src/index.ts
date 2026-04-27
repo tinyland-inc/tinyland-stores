@@ -82,7 +82,9 @@ export {
 
 
 
-export { autoSaveStore, getSaveStatus } from './autosave.svelte.js';
+export { autoSaveStore, createAutoSaveStore, getSaveStatus } from './autosave.svelte.js';
+export { createAutoSaveApiTransport } from './autosave-transport.js';
+export type { AutoSaveTransport, Draft as AutoSaveDraft } from './autosave-transport.js';
 
 
 

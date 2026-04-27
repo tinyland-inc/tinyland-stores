@@ -46,7 +46,6 @@ js_run_binary(
         "package.json",
         "tsconfig.json",
         ":node_modules",
-        "//packages:tsconfig_base",
     ],
     args = [
         "-i",
@@ -76,7 +75,7 @@ npm_package(
         ":tinyland_stores",
     ],
     package = "@tummycrypt/tinyland-stores",
-    version = "0.1.0",
+    version = "0.2.2",
     visibility = ["//visibility:public"],
 )
 
@@ -89,7 +88,6 @@ vitest_bin.vitest_test(
     data = [
         ":node_modules",
         "tsconfig.json",
-        "//packages:tsconfig_base",
         ":node_modules/vitest",
         "vitest.config.ts",
     ] + glob(["src/**/*.ts"]) + glob(["tests/**/*.test.ts", "tests/**/*.ts"]),
@@ -120,7 +118,6 @@ js_run_binary(
     ) + [
         "tsconfig.json",
         ":node_modules",
-        "//packages:tsconfig_base",
     ],
     args = [
         "--tsconfig",

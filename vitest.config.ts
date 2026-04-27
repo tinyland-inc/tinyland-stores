@@ -22,9 +22,13 @@ export default defineConfig({
     name: 'tinyland-stores',
     root: __dirname,
     globals: true,
-    environment: 'jsdom',
+    environment: 'node',
+    setupFiles: [resolve(__dirname, './tests/setup-dom.ts')],
     include: ['tests/**/*.test.ts'],
-    pool: 'forks',
+    pool: 'threads',
+    deps: {
+      interopDefault: true,
+    },
     isolate: true,
     testTimeout: 10000,
     coverage: {
