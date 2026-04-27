@@ -12,12 +12,25 @@ load("@aspect_rules_js//npm:defs.bzl", "npm_package")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 load("@tummycrypt_tinyland_stores_npm//:defs.bzl", "npm_link_all_packages")
 load("@tummycrypt_tinyland_stores_npm//:vitest/package_json.bzl", vitest_bin = "bin")
+load("@tummycrypt_tinyland_stores_npm//:@sveltejs/package/package_json.bzl", svelte_package = "bin")
+load("@tummycrypt_tinyland_stores_npm//:svelte-check/package_json.bzl", svelte_check = "bin")
 
 # =============================================================================
 # npm link - makes node_modules available for this package
 # =============================================================================
 
 npm_link_all_packages(name = "node_modules")
+
+svelte_package.svelte_package_binary(
+    name = "svelte_package",
+    visibility = ["//visibility:public"],
+)
+
+svelte_check.svelte_check_binary(
+    name = "svelte_check",
+    visibility = ["//visibility:public"],
+)
+
 
 
 # =============================================================================
