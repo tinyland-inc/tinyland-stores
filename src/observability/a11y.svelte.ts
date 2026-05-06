@@ -531,7 +531,6 @@ function getA11yStore(): ReturnType<typeof createA11yStore> {
 	}
 
 	if (!_storeInstance) {
-		console.info('[A11y] Creating singleton store instance');
 		_storeInstance = createA11yStore();
 	}
 
