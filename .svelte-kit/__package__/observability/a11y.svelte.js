@@ -341,7 +341,6 @@ function getA11yStore() {
         return createMockA11yStore();
     }
     if (!_storeInstance) {
-        console.info('[A11y] Creating singleton store instance');
         _storeInstance = createA11yStore();
     }
     return _storeInstance;
