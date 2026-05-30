@@ -11,12 +11,6 @@ importers:
       '@opentelemetry/api':
         specifier: ^1.9.0
         version: 1.9.1
-      '@tummycrypt/tinyland-composables':
-        specifier: ^0.2.2
-        version: 0.2.2(svelte@5.55.5)
-      '@tummycrypt/tinyland-types':
-        specifier: ^0.2.2
-        version: 0.2.2
     devDependencies:
       '@fast-check/vitest':
         specifier: ^0.2.4
@@ -207,20 +201,6 @@ packages:
     hasBin: true
     peerDependencies:
       svelte: ^3.44.0 || ^4.0.0 || ^5.0.0-next.1
-
-  '@tummycrypt/tinyland-composables@0.2.2':
-    resolution: {integrity: sha512-1AhWs+BI7Z625wqyV5iCq32gvOeCJlSoFlIcbeS9jRtXsEStBM08gsbsrQA2+ebG+vhFSFntQaVmMqcGQ+DRWg==}
-    engines: {node: '>=22.0.0'}
-    peerDependencies:
-      runed: '>=0.20.0'
-      svelte: '>=5.0.0'
-    peerDependenciesMeta:
-      runed:
-        optional: true
-
-  '@tummycrypt/tinyland-types@0.2.2':
-    resolution: {integrity: sha512-q50kAlfvJT2mWT+QXW/lIEOY4M5xT+EXlD5/SdOI/XKeJzv0t7D8pdS5xZictM8WgT0qfZ6OVRWbhW8dXj/C+w==}
-    engines: {node: '>=22.0.0'}
 
   '@tybys/wasm-util@0.10.1':
     resolution: {integrity: sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg==}
@@ -786,12 +766,6 @@ snapshots:
       svelte2tsx: 0.7.53(svelte@5.55.5)(typescript@5.9.3)
     transitivePeerDependencies:
       - typescript
-
-  '@tummycrypt/tinyland-composables@0.2.2(svelte@5.55.5)':
-    dependencies:
-      svelte: 5.55.5
-
-  '@tummycrypt/tinyland-types@0.2.2': {}
 
   '@tybys/wasm-util@0.10.1':
     dependencies:
