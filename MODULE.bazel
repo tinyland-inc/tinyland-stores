@@ -11,7 +11,7 @@ bazel_dep(name = "bazel_skylib", version = "1.8.2")
 bazel_dep(name = "platforms", version = "1.0.0")
 bazel_dep(name = "rules_nodejs", version = "6.7.3")
 # Inter-module dependencies
-bazel_dep(name = "tummycrypt_tinyland_composables", version = "0.2.3")
+bazel_dep(name = "tummycrypt_tinyland_composables", version = "0.2.4")
 bazel_dep(name = "tummycrypt_tinyland_types", version = "0.2.3")
 
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node")
