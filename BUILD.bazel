@@ -30,6 +30,18 @@ npm_link_package(
     src = "@tummycrypt_tinyland_composables//:pkg",
 )
 
+# observability/a11y.svelte.ts imports @tummycrypt/tinyland-a11y-engine/browser
+npm_link_package(
+    name = "node_modules/@tummycrypt/tinyland-a11y-engine",
+    src = "@tummycrypt_tinyland_a11y_engine//:pkg",
+)
+
+# themeStore.svelte.ts imports getThemeCatalog from @tummycrypt/tinyvectors
+npm_link_package(
+    name = "node_modules/@tummycrypt/tinyvectors",
+    src = "@tummycrypt_tinyvectors//:pkg",
+)
+
 svelte_package.svelte_package_binary(
     name = "svelte_package",
     visibility = ["//visibility:public"],
@@ -68,6 +80,8 @@ js_run_binary(
         "tsconfig.json",
         ":node_modules",
         ":node_modules/@tummycrypt/tinyland-composables",
+        ":node_modules/@tummycrypt/tinyland-a11y-engine",
+        ":node_modules/@tummycrypt/tinyvectors",
     ],
     args = [
         "-i",
@@ -97,7 +111,7 @@ npm_package(
         ":tinyland_stores",
     ],
     package = "@tummycrypt/tinyland-stores",
-    version = "0.2.3",
+    version = "0.2.4",
     visibility = ["//visibility:public"],
 )
 
@@ -112,6 +126,8 @@ vitest_bin.vitest_test(
         "tsconfig.json",
         ":node_modules/vitest",
         ":node_modules/@tummycrypt/tinyland-composables",
+        ":node_modules/@tummycrypt/tinyland-a11y-engine",
+        ":node_modules/@tummycrypt/tinyvectors",
         "vitest.config.ts",
     ] + glob(["src/**/*.ts"]) + glob(["tests/**/*.test.ts", "tests/**/*.ts"]),
     args = [
@@ -142,6 +158,8 @@ js_run_binary(
         "tsconfig.json",
         ":node_modules",
         ":node_modules/@tummycrypt/tinyland-composables",
+        ":node_modules/@tummycrypt/tinyland-a11y-engine",
+        ":node_modules/@tummycrypt/tinyvectors",
     ],
     args = [
         "--tsconfig",
