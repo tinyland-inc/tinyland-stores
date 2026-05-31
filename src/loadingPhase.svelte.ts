@@ -25,7 +25,7 @@ export type LoadingPhase =
 	| 'loading-theme'          
 	| 'starting-services'      
 	| 'connecting-trpc'        
-	| 'loading-a11y'           
+	| 'finalizing-startup'
 	| 'ready';                 
 
 interface LoadingState {
@@ -43,7 +43,7 @@ const phaseConfig: Record<LoadingPhase, { progress: number; message: string }> =
 	'loading-theme': { progress: 30, message: 'LOADING THEME...' },
 	'starting-services': { progress: 50, message: 'STARTING SERVICES...' },
 	'connecting-trpc': { progress: 70, message: 'CONNECTING...' },
-	'loading-a11y': { progress: 90, message: 'LOADING A11Y...' },
+	'finalizing-startup': { progress: 90, message: 'FINALIZING STARTUP...' },
 	'ready': { progress: 100, message: 'READY!' }
 };
 
@@ -138,8 +138,8 @@ class LoadingPhaseStore {
 			this.state.phase = 'ready';
 			this.state.message = 'READY!';
 		} else if (clampedProgress >= 90) {
-			this.state.phase = 'loading-a11y';
-			this.state.message = 'LOADING A11Y...';
+			this.state.phase = 'finalizing-startup';
+			this.state.message = 'FINALIZING STARTUP...';
 		} else if (clampedProgress >= 70) {
 			this.state.phase = 'connecting-trpc';
 			this.state.message = 'CONNECTING...';

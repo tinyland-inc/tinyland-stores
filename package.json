@@ -1,6 +1,6 @@
 {
   "name": "@tummycrypt/tinyland-stores",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Svelte 5 reactive stores for authentication, theming, CSRF, observability, and accessibility state management",
   "type": "module",
   "license": "Zlib AND LicenseRef-Tinyland-Proprietary",

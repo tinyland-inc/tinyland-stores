@@ -1,6 +1,6 @@
 module(
     name = "tummycrypt_tinyland_stores",
-    version = "0.2.3",
+    version = "0.2.4",
     compatibility_level = 1,
 )
 
@@ -13,6 +13,8 @@ bazel_dep(name = "rules_nodejs", version = "6.7.3")
 # Inter-module dependencies
 bazel_dep(name = "tummycrypt_tinyland_composables", version = "0.2.4")
 bazel_dep(name = "tummycrypt_tinyland_types", version = "0.2.3")
+bazel_dep(name = "tummycrypt_tinyland_a11y_engine", version = "0.2.4")
+bazel_dep(name = "tummycrypt_tinyvectors", version = "0.3.1")
 
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node")
 node.toolchain(node_version = "22.13.1")
