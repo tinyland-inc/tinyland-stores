@@ -18,6 +18,17 @@ bazel_dep(name = "tummycrypt_tinyland_a11y_engine", version = "0.2.4")
 bazel_dep(name = "tummycrypt_tinyland_composables", version = "0.2.4")
 bazel_dep(name = "tummycrypt_tinyvectors", version = "0.3.0")
 
+# tinyvectors 0.3.0/0.3.1 ship a scripts/build-declarations.mjs that runs tsc from the
+# wrong CWD (TS5058: tsconfig.declarations.json not found). Apply the same fix the
+# tinyland.dev monorepo carries, until a fixed tinyvectors is republished.
+single_version_override(
+    module_name = "tummycrypt_tinyvectors",
+    patches = ["//patches:tummycrypt_tinyvectors-declaration-cwd.patch"],
+    patch_strip = 1,
+    registry = "https://raw.githubusercontent.com/tinyland-inc/bazel-registry/main",
+    version = "0.3.0",
+)
+
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node")
 node.toolchain(node_version = "22.13.1")
 

@@ -1,0 +1,15 @@
+--- a/scripts/build-declarations.mjs
++++ b/scripts/build-declarations.mjs
+@@ -2,8 +2,11 @@
+ import { createRequire } from 'node:module';
+ 
+ const require = createRequire(import.meta.url);
++const packageRoot = new URL('../', import.meta.url);
++const declarationsConfig = new URL('../tsconfig.declarations.json', import.meta.url);
+ const tscPath = require.resolve('typescript/lib/tsc.js');
+-const result = spawnSync(process.execPath, [tscPath, '-p', 'tsconfig.declarations.json'], {
++const result = spawnSync(process.execPath, [tscPath, '-p', declarationsConfig.pathname], {
++	cwd: packageRoot,
+ 	stdio: 'inherit',
+ });
+ 
