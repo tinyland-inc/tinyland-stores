@@ -14,6 +14,12 @@
 
 import { browser } from '../env.js';
 import {
+	detectBrowserA11yFingerprint,
+	runAxeEvaluation,
+	type BrowserA11yFingerprint,
+	type BrowserA11yViolation
+} from '@tummycrypt/tinyland-a11y-engine/browser';
+import {
 	createCircuitBreaker,
 	loadCircuitBreakerState,
 	recordSuccess,
@@ -71,19 +77,7 @@ export function configureA11yStore(deps: A11yStoreDeps): void {
 }
 
 
-interface A11yViolation {
-	id: string;
-	impact: 'critical' | 'serious' | 'moderate' | 'minor';
-	description: string;
-	help: string;
-	helpUrl?: string;
-	nodes: Array<{
-		html: string;
-		target: string[];
-		failureSummary?: string;
-	}>;
-	tags: string[];
-}
+type A11yViolation = BrowserA11yViolation;
 
 interface A11yState {
 	violations: A11yViolation[];
@@ -101,10 +95,7 @@ interface A11yState {
 	};
 	circuitBreaker: CircuitBreakerState;
 	fingerprint: string | null;
-	a11yFingerprint: {
-		screenReader?: { detected?: boolean; type?: string };
-		preferences?: { reducedMotion?: boolean; highContrast?: boolean };
-	} | null;
+	a11yFingerprint: BrowserA11yFingerprint | null;
 	disabled: {
 		fingerprint: string | null;
 		disabledAt: number | null;
@@ -122,6 +113,8 @@ interface A11yState {
 
 function createA11yStore() {
 	const loadedCircuitBreaker = loadCircuitBreakerState() || createCircuitBreaker();
+	let initializePromise: Promise<void> | null = null;
+	let isInitialized = false;
 
 	let state = $state<A11yState>({
 		violations: [],
@@ -274,12 +267,10 @@ function createA11yStore() {
 		state.isEvaluating = true;
 
 		try {
-			const axe = await import('axe-core');
+			const violations = await runAxeEvaluation(element);
 
-			const results = await axe.default.run(element);
-
-			if (results.violations.length > 0) {
-				queueViolations(results.violations as A11yViolation[]);
+			if (violations.length > 0) {
+				queueViolations(violations);
 
 				if (state.pendingQueue.length >= 10) {
 					await flush();
@@ -373,7 +364,7 @@ function createA11yStore() {
 			state.fingerprint = await _deps.getFingerprint();
 			console.info('[A11y] Fingerprint initialized:', state.fingerprint);
 
-			state.a11yFingerprint = detectA11yFingerprint() as typeof state.a11yFingerprint;
+			state.a11yFingerprint = detectBrowserA11yFingerprint();
 			console.info('[A11y] A11y fingerprint detected:', state.a11yFingerprint);
 		} catch (error) {
 			console.error('[A11y] Failed to initialize fingerprint:', error);
@@ -383,18 +374,7 @@ function createA11yStore() {
 	function detectA11yFingerprint() {
 		if (!browser) return null;
 
-		return {
-			screenReader: {
-				detected: false,
-				type: null as string | null
-			},
-			preferences: {
-				reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-				highContrast: window.matchMedia('(prefers-contrast: high)').matches,
-				forcedColors: window.matchMedia('(forced-colors: active)').matches,
-				darkMode: window.matchMedia('(prefers-color-scheme: dark)').matches
-			}
-		};
+		return detectBrowserA11yFingerprint();
 	}
 
 	function isDisabled(): boolean {
@@ -442,7 +422,7 @@ function createA11yStore() {
 		console.warn(`[A11y] Monitoring disabled for fingerprint ${state.fingerprint}: ${reason} (expires ${new Date(expiresAt).toISOString()})`);
 	}
 
-	async function handleNetworkRecovery() {
+	async function recoverConnection() {
 		console.info('[A11y] Network recovered, attempting circuit breaker recovery...');
 
 		if (state.circuitBreaker.state === 'CLOSED') {
@@ -471,18 +451,35 @@ function createA11yStore() {
 			return;
 		}
 
-		console.info('[A11y] Initializing store on client');
-		await initializeFingerprint();
+		if (!_deps) {
+			console.warn('[A11y] Skipping initialization until dependencies are configured');
+			return;
+		}
 
-		window.addEventListener('online', handleNetworkRecovery);
-		console.debug('[A11y] Network recovery listener registered');
+		if (isInitialized) {
+			console.debug('[A11y] Initialization already completed, skipping');
+			return;
+		}
 
-		await testConnection();
-		console.info('[A11y] Initial connection test completed');
-	}
+		if (initializePromise) {
+			console.debug('[A11y] Initialization already in progress, awaiting existing promise');
+			await initializePromise;
+			return;
+		}
 
-	if (browser && _deps) {
-		initialize();
+		initializePromise = (async () => {
+			console.info('[A11y] Initializing store on client');
+			await initializeFingerprint();
+			await testConnection();
+			isInitialized = true;
+			console.info('[A11y] Initial connection test completed');
+		})();
+
+		try {
+			await initializePromise;
+		} finally {
+			initializePromise = null;
+		}
 	}
 
 	return {
@@ -515,6 +512,7 @@ function createA11yStore() {
 		detectA11yFingerprint,
 		isDisabled,
 		disableA11y,
+		recoverConnection,
 		resetCircuitBreaker,
 		scanContrast
 	};
@@ -575,6 +573,7 @@ function createMockA11yStore(): ReturnType<typeof createA11yStore> {
 		detectA11yFingerprint: () => null,
 		isDisabled: () => false,
 		disableA11y: noop as any,
+		recoverConnection: noopAsync,
 		resetCircuitBreaker: noop,
 		scanContrast: noopAsync as any
 	};

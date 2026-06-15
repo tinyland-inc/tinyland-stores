@@ -101,6 +101,7 @@ export type { ColorUtilities } from './colorStore.svelte.js';
 
 
 export { themeStore } from './themeStore.svelte.js';
+export type { DarkModePreference, ServerThemeSettings, ThemeConfig } from './themeStore.svelte.js';
 
 
 

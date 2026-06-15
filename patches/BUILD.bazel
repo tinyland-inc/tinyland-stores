@@ -1,0 +1,2 @@
+# Patch files applied to registry deps via single_version_override in //:MODULE.bazel.
+exports_files(glob(["*.patch"]))
