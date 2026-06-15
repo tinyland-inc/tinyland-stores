@@ -21,13 +21,24 @@ load("@tummycrypt_tinyland_stores_npm//:svelte-check/package_json.bzl", svelte_c
 
 npm_link_all_packages(name = "node_modules")
 
-# First-party dep resolved via the Bazel module graph (not npm). tinyland-composables
-# is linked from its published module's :pkg target; it is removed from package.json so
-# npm_link_all_packages does not also link it (TIN-1716). svelte peer is provided by this
-# package's own node_modules, so there is a single svelte instance.
+# First-party deps resolved via the Bazel module graph (not npm). Each is linked from its
+# published module's :pkg target and kept out of package.json so npm_link_all_packages does
+# not also link it (TIN-1716). svelte peer is provided by this package's own node_modules,
+# so there is a single svelte instance.
+#   - tinyland-composables: autosave store helpers
+#   - tinyvectors:          getThemeCatalog() for the theme catalog (#570 hub labels)
+#   - tinyland-a11y-engine: browser a11y detection (/browser subpath; needs >= 0.2.4)
 npm_link_package(
     name = "node_modules/@tummycrypt/tinyland-composables",
     src = "@tummycrypt_tinyland_composables//:pkg",
+)
+npm_link_package(
+    name = "node_modules/@tummycrypt/tinyvectors",
+    src = "@tummycrypt_tinyvectors//:pkg",
+)
+npm_link_package(
+    name = "node_modules/@tummycrypt/tinyland-a11y-engine",
+    src = "@tummycrypt_tinyland_a11y_engine//:pkg",
 )
 
 svelte_package.svelte_package_binary(
@@ -68,6 +79,8 @@ js_run_binary(
         "tsconfig.json",
         ":node_modules",
         ":node_modules/@tummycrypt/tinyland-composables",
+        ":node_modules/@tummycrypt/tinyvectors",
+        ":node_modules/@tummycrypt/tinyland-a11y-engine",
     ],
     args = [
         "-i",
@@ -97,7 +110,7 @@ npm_package(
         ":tinyland_stores",
     ],
     package = "@tummycrypt/tinyland-stores",
-    version = "0.2.3",
+    version = "0.3.0",
     visibility = ["//visibility:public"],
 )
 
@@ -112,6 +125,8 @@ vitest_bin.vitest_test(
         "tsconfig.json",
         ":node_modules/vitest",
         ":node_modules/@tummycrypt/tinyland-composables",
+        ":node_modules/@tummycrypt/tinyvectors",
+        ":node_modules/@tummycrypt/tinyland-a11y-engine",
         "vitest.config.ts",
     ] + glob(["src/**/*.ts"]) + glob(["tests/**/*.test.ts", "tests/**/*.ts"]),
     args = [
@@ -142,6 +157,8 @@ js_run_binary(
         "tsconfig.json",
         ":node_modules",
         ":node_modules/@tummycrypt/tinyland-composables",
+        ":node_modules/@tummycrypt/tinyvectors",
+        ":node_modules/@tummycrypt/tinyland-a11y-engine",
     ],
     args = [
         "--tsconfig",

@@ -1,6 +1,6 @@
 module(
     name = "tummycrypt_tinyland_stores",
-    version = "0.2.3",
+    version = "0.3.0",
     compatibility_level = 1,
 )
 
@@ -10,9 +10,13 @@ bazel_dep(name = "aspect_rules_ts", version = "3.8.4")
 bazel_dep(name = "bazel_skylib", version = "1.8.2")
 bazel_dep(name = "platforms", version = "1.0.0")
 bazel_dep(name = "rules_nodejs", version = "6.7.3")
-# Inter-module dependencies
+# Inter-module dependencies (graph-linked via BUILD.bazel npm_link_package).
+# 0.3.0 refactor: catalog moved to tinyvectors (getThemeCatalog) and browser a11y
+# moved to tinyland-a11y-engine (/browser subpath, needs >= 0.2.4); tinyland_types
+# dropped (no longer imported by src/).
+bazel_dep(name = "tummycrypt_tinyland_a11y_engine", version = "0.2.4")
 bazel_dep(name = "tummycrypt_tinyland_composables", version = "0.2.4")
-bazel_dep(name = "tummycrypt_tinyland_types", version = "0.2.3")
+bazel_dep(name = "tummycrypt_tinyvectors", version = "0.3.0")
 
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node")
 node.toolchain(node_version = "22.13.1")

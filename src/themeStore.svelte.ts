@@ -1,19 +1,10 @@
 
-
-
-
-
-
-
-
-
-
-
+import { getThemeCatalog } from '@tummycrypt/tinyvectors';
 import { browser } from './env.js';
 import type { FingerprintSettings } from './types/fingerprint.js';
 
 
-interface ThemeConfig {
+export interface ThemeConfig {
   name: string;
   label?: string;
   displayName?: string;
@@ -21,11 +12,13 @@ interface ThemeConfig {
   hasVectors?: boolean;
   isHighContrast?: boolean;
   colors?: string[];
+  previewColors?: string[];
+  vectorColors?: string[];
   source?: string;
 }
 
 
-type DarkModePreference = 'light' | 'dark' | 'system';
+export type DarkModePreference = 'light' | 'dark' | 'system';
 
 
 
@@ -37,50 +30,34 @@ export interface ServerThemeSettings {
 }
 
 
+// Hub-side display labels mirror the blog (jesssullivan.github.io) theme naming
+// so the switcher reads identically across surfaces. The canonical theme `name`s
+// and the tinyvectors schema are unchanged — only the human-facing label differs.
+const HUB_THEME_LABELS: Record<string, string> = {
+  trans: 'xoxd',
+  pride: 'Goth',
+};
+
+function withHubLabels<T extends { name: string; label?: string }>(themes: readonly T[]): T[] {
+  return themes.map((theme) =>
+    HUB_THEME_LABELS[theme.name] ? { ...theme, label: HUB_THEME_LABELS[theme.name] } : theme
+  );
+}
+
+
 class ThemeStore {
   
   #currentTheme = $state<string>('trans');
   #darkMode = $state<boolean>(true); 
   #darkModePreference = $state<DarkModePreference>('system');
   #themes = $state<ThemeConfig[]>([]);
-  #isLoading = $state<boolean>(false);
   #initialized = $state<boolean>(false);
   #serverSettingsApplied = $state<boolean>(false);
   #mediaQueryCleanup: (() => void) | null = null;
 
   
   #defaultThemes: ThemeConfig[] = [
-    {
-      name: 'tinyland',
-      label: 'Tinyland',
-      description: 'Soft violet, blue, and pink glow',
-      colors: ['#8B5CF6', '#3B82F6', '#EC4899'],
-      source: 'custom',
-      hasVectors: true
-    },
-    {
-      name: 'trans',
-      label: 'Trans Pride',
-      description: 'Soft trans pride palette',
-      colors: ['#5BCEFA', '#F5A9B8', '#FFFFFF'],
-      source: 'custom',
-      hasVectors: true
-    },
-    {
-      name: 'pride',
-      label: 'Pride Rainbow',
-      description: 'Rainbow signal colors with diffuse vectors',
-      colors: ['#E40303', '#FF8C00', '#732982'],
-      source: 'custom',
-      hasVectors: true
-    },
-    {
-      name: 'high-contrast',
-      label: 'High Contrast',
-      description: 'WCAG AAA compliant for maximum readability',
-      colors: ['#000000', '#FFFFFF', '#0040FF'],
-      source: 'custom'
-    },
+    ...withHubLabels(getThemeCatalog()),
     {
       name: 'cerberus',
       label: 'Cerberus',
@@ -107,7 +84,7 @@ class ThemeStore {
     },
     {
       name: 'pine',
-      label: 'Pine',
+      label: 'TSS',
       description: 'Forest greens with bright moss accents',
       colors: ['#22C55E', '#86EFAC', '#166534'],
       source: 'skeleton',
@@ -120,7 +97,6 @@ class ThemeStore {
   get darkMode() { return this.#darkMode; }
   get darkModePreference() { return this.#darkModePreference; }
   get themes() { return this.#themes; }
-  get isLoading() { return this.#isLoading; }
   get initialized() { return this.#initialized; }
   get serverSettingsApplied() { return this.#serverSettingsApplied; }
 
@@ -235,10 +211,6 @@ class ThemeStore {
       if (this.#darkModePreference === 'system') {
         this.#darkMode = e.matches;
         this.applyTheme(this.#currentTheme, this.#darkMode);
-
-        window.dispatchEvent(new CustomEvent('dark-mode-change', {
-          detail: { darkMode: this.#darkMode, source: 'system' }
-        }));
       }
     };
 
@@ -262,10 +234,6 @@ class ThemeStore {
     }
 
     this.applyTheme(this.#currentTheme, this.#darkMode);
-
-    window.dispatchEvent(new CustomEvent('dark-mode-change', {
-      detail: { darkMode: this.#darkMode, preference }
-    }));
   }
 
   private applyTheme(themeName: string, darkMode: boolean) {
@@ -309,8 +277,6 @@ class ThemeStore {
     }
 
     try {
-      document.documentElement.classList.add('theme-transitioning');
-
       this.#currentTheme = themeName;
       this.applyTheme(themeName, this.#darkMode);
 
@@ -320,58 +286,10 @@ class ThemeStore {
         
       }
 
-      setTimeout(() => {
-        document.documentElement.classList.remove('theme-transitioning');
-      }, 300);
-
-      window.dispatchEvent(new CustomEvent('theme-change', {
-        detail: { theme: themeName }
-      }));
-
       this.logThemeState();
     } catch (err) {
       console.error(`Failed to set theme ${themeName}:`, err);
-      document.documentElement.classList.remove('theme-transitioning');
     }
-  }
-
-  toggleDarkMode() {
-    if (!browser) return;
-
-    const newDarkMode = !this.#darkMode;
-    const newPreference: DarkModePreference = newDarkMode ? 'dark' : 'light';
-
-    this.#darkModePreference = newPreference;
-    this.#darkMode = newDarkMode;
-
-    const root = document.documentElement;
-    root.classList.add('theme-transitioning');
-
-    if (this.#darkMode) {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
-
-    void root.offsetHeight;
-
-    try {
-      localStorage.setItem(ThemeStore.#STORAGE_KEY_DARK_MODE, newPreference);
-    } catch {
-      
-    }
-
-    window.dispatchEvent(new CustomEvent('dark-mode-change', {
-      detail: { darkMode: this.#darkMode, preference: newPreference }
-    }));
-
-    setTimeout(() => {
-      root.classList.remove('theme-transitioning');
-    }, 300);
-  }
-
-  getThemeByName(name: string): ThemeConfig | undefined {
-    return this.#themes.find(t => t.name === name);
   }
 
   logThemeState(): void {
@@ -380,96 +298,9 @@ class ThemeStore {
       darkMode: this.#darkMode,
       hasVectors: this.hasVectors,
       isHighContrast: this.#currentTheme === 'high-contrast',
-      isLoading: this.#isLoading,
       initialized: this.#initialized,
       availableThemes: this.#themes.map(t => t.name)
     });
-  }
-
-  subscribe = (run: (value: any) => void) => {
-    const notify = () => run({
-      currentTheme: this.#currentTheme,
-      darkMode: this.#darkMode,
-      darkModePreference: this.#darkModePreference,
-      themes: this.#themes,
-      isLoading: this.#isLoading,
-      initialized: this.#initialized,
-      currentThemeConfig: this.currentThemeConfig,
-      isHighContrast: this.isHighContrast,
-      hasVectors: this.hasVectors
-    });
-
-    notify();
-
-    let isActive = true;
-    $effect(() => {
-      if (!isActive) return;
-      notify();
-    });
-
-    return () => {
-      isActive = false;
-    };
-  };
-
-  set = (value: any) => {
-    if (value.currentTheme !== undefined) this.setTheme(value.currentTheme);
-    if (value.darkMode !== undefined && value.darkMode !== this.#darkMode) this.toggleDarkMode();
-  };
-
-  update = (fn: (value: any) => any) => {
-    this.set(fn(this.get()));
-  };
-
-  get = () => ({
-    currentTheme: this.#currentTheme,
-    darkMode: this.#darkMode,
-    darkModePreference: this.#darkModePreference,
-    themes: this.#themes,
-    isLoading: this.#isLoading,
-    initialized: this.#initialized,
-    currentThemeConfig: this.currentThemeConfig,
-    isHighContrast: this.isHighContrast,
-    hasVectors: this.hasVectors
-  });
-
-  subscribeCurrentTheme(callback: (value: string) => void) {
-    return this.#subscribeToRune(() => this.#currentTheme, callback);
-  }
-
-  subscribeDarkMode(callback: (value: boolean) => void) {
-    return this.#subscribeToRune(() => this.#darkMode, callback);
-  }
-
-  subscribeDarkModePreference(callback: (value: DarkModePreference) => void) {
-    return this.#subscribeToRune(() => this.#darkModePreference, callback);
-  }
-
-  subscribeThemes(callback: (value: ThemeConfig[]) => void) {
-    return this.#subscribeToRune(() => this.#themes, callback);
-  }
-
-  subscribeLoading(callback: (value: boolean) => void) {
-    return this.#subscribeToRune(() => this.#isLoading, callback);
-  }
-
-  #subscribeToRune<T>(getter: () => T, callback: (value: T) => void): () => void {
-    if (!browser) {
-      return () => {};
-    }
-
-    callback(getter());
-
-    let isActive = true;
-    $effect(() => {
-      if (!isActive) return;
-      const value = getter();
-      callback(value);
-    });
-
-    return () => {
-      isActive = false;
-    };
   }
 }
 
