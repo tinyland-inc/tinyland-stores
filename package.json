@@ -1,6 +1,7 @@
 {
   "name": "@tummycrypt/tinyland-stores",
-  "version": "0.3.1",
+  "version": "1.0.0",
+  "private": true,
   "description": "Svelte 5 reactive stores for authentication, theming, CSRF, observability, and accessibility state management",
   "type": "module",
   "license": "Zlib AND LicenseRef-Tinyland-Proprietary",
@@ -17,17 +18,16 @@
   },
   "files": [
     "dist",
-    "LICENSE"
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md"
   ],
   "scripts": {
-    "build": "svelte-package -i src -o dist",
-    "dev": "svelte-package -i src -o dist --watch",
+    "build": "tsc",
     "clean": "rm -rf dist",
-    "check": "svelte-check --tsconfig ./tsconfig.json",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "svelte-check --tsconfig ./tsconfig.json",
-    "prepublishOnly": "pnpm build && pnpm check:package",
+    "typecheck": "tsc --noEmit",
     "check:package": "publint"
   },
   "keywords": [
@@ -45,41 +45,26 @@
   "author": "Tinyland.dev",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tinyland-inc/tinyland-stores.git"
-  },
-  "dependencies": {},
-  "devDependencies": {
-    "@fast-check/vitest": "^0.2.4",
-    "@sveltejs/package": "^2.3.0",
-    "@types/node": "^22.0.0",
-    "axe-core": "^4.10.0",
-    "fast-check": "^4.3.0",
-    "happy-dom": "^17.0.0",
-    "svelte": "^5.0.0",
-    "svelte-check": "^4.0.0",
-    "typescript": "^5.0.0",
-    "vitest": "^4.0.0",
-    "publint": "^0.3.18"
+    "url": "git+https://github.com/xoxd-ai/tinyland-stores.git"
   },
   "peerDependencies": {
-    "svelte": "^5.0.0",
-    "@opentelemetry/api": "^1.9.0"
+    "svelte": "5.57.2"
   },
-  "peerDependenciesMeta": {
-    "@opentelemetry/api": {
-      "optional": true
-    }
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "happy-dom": "^20.14.6",
+    "publint": "^0.3.25",
+    "svelte": "5.57.2",
+    "typescript": "7.0.2",
+    "vite": "8.3.3",
+    "vitest": "5.0.3"
   },
   "engines": {
-    "node": ">=22.0.0"
-  },
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/",
-    "access": "public"
+    "node": ">=22.12.0"
   },
   "packageManager": "pnpm@10.13.1",
-  "homepage": "https://github.com/tinyland-inc/tinyland-stores",
+  "homepage": "https://github.com/xoxd-ai/tinyland-stores",
   "bugs": {
-    "url": "https://github.com/tinyland-inc/tinyland-stores/issues"
+    "url": "https://github.com/xoxd-ai/tinyland-stores/issues"
   }
 }

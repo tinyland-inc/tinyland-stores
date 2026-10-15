@@ -1,25 +1,30 @@
 module(
     name = "tummycrypt_tinyland_stores",
-    version = "0.3.1",
+    version = "1.0.0",
     compatibility_level = 1,
 )
 
 bazel_dep(name = "aspect_bazel_lib", version = "2.22.5")
 bazel_dep(name = "aspect_rules_js", version = "2.9.1")
-bazel_dep(name = "aspect_rules_ts", version = "3.8.4")
+bazel_dep(name = "aspect_rules_ts", version = "3.10.1")
 bazel_dep(name = "bazel_skylib", version = "1.8.2")
 bazel_dep(name = "platforms", version = "1.0.0")
 bazel_dep(name = "rules_nodejs", version = "6.7.3")
-# Inter-module dependencies (graph-linked via BUILD.bazel npm_link_package).
-# 0.3.0 refactor: catalog moved to tinyvectors (getThemeCatalog) and browser a11y
-# moved to tinyland-a11y-engine (/browser subpath, needs >= 0.2.4); tinyland_types
-# dropped (no longer imported by src/).
-bazel_dep(name = "tummycrypt_tinyland_a11y_engine", version = "0.2.4")
-bazel_dep(name = "tummycrypt_tinyland_composables", version = "0.2.4")
-bazel_dep(name = "tummycrypt_tinyvectors", version = "0.3.2")
+
+# In-house modules from xoxd-ai/bazel-registry, linked in BUILD.bazel with
+# npm_link_package. They are not in package.json (RU6: Bazel-only distribution).
+#   - tinyland-composables: autosave store helpers (useEditorQueue)
+#   - tinyvectors:          getThemeCatalog() for the theme catalog
+#   - tinyland-a11y-engine: browser a11y detection (the ./browser subpath)
+#   - tinyland-color-utils: runtime dependency of tinyland-a11y-engine, linked
+#                           here and passed to the engine link as `deps`
+bazel_dep(name = "tummycrypt_tinyland_a11y_engine", version = "1.0.0")
+bazel_dep(name = "tummycrypt_tinyland_color_utils", version = "1.0.0")
+bazel_dep(name = "tummycrypt_tinyland_composables", version = "1.0.0")
+bazel_dep(name = "tummycrypt_tinyvectors", version = "1.0.0")
 
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node")
-node.toolchain(node_version = "22.13.1")
+node.toolchain(node_version = "22.22.0")
 
 pnpm = use_extension("@aspect_rules_js//npm:extensions.bzl", "pnpm")
 pnpm.pnpm(
@@ -39,6 +44,8 @@ npm.npm_translate_lock(
 )
 use_repo(npm, "tummycrypt_tinyland_stores_npm")
 
-rules_ts_ext = use_extension("@aspect_rules_ts//ts:extensions.bzl", "ext")
-rules_ts_ext.deps(ts_version = "5.9.3")
-use_repo(rules_ts_ext, "npm_typescript")
+# TypeScript 7.0.2 (native compiler) per RU1/RU13. rules_ts >= 3.9.0 knows the
+# native package integrities; ts_project must set transpiler = "tsc".
+typescript = use_extension("@aspect_rules_ts//ts:extensions.bzl", "typescript")
+typescript.deps(version = "7.0.2")
+use_repo(typescript, "npm_typescript")
