@@ -1,5 +1,8 @@
 common --enable_bzlmod
-common --registry=https://raw.githubusercontent.com/tinyland-inc/bazel-registry/main
+# In-house modules come from xoxd-ai/bazel-registry, pinned to a commit so the
+# registry bytes recorded in MODULE.bazel.lock cannot move under us (RU6). The
+# former tinyland-inc registry line is gone: that org redirects to xoxd-ai.
+common --registry=https://raw.githubusercontent.com/xoxd-ai/bazel-registry/aedc47769da5e367432afe8355177b0a87960468
 common --registry=https://bcr.bazel.build
 
 build --jobs=auto

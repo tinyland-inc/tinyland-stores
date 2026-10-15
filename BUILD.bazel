@@ -1,115 +1,112 @@
 """
-BUILD.bazel for @tummycrypt/tinyland-stores (Svelte variant).
+BUILD.bazel for @tummycrypt/tinyland-stores.
 
-Dual-mode build for packages containing .svelte.ts files (stores with runes).
-Uses svelte-package instead of plain tsc.
+  Bazel:      bazel build //:pkg && bazel test //...
+  Consumers:  bazel_dep(name = "tummycrypt_tinyland_stores", version = "1.0.0")
+              from xoxd-ai/bazel-registry; the package is not published to npm.
+              See README.md for the npm_link_package recipe.
 
-  Standalone: cd packages/tinyland-stores && pnpm build
+The sources are .ts and .svelte.ts modules only (no .svelte components), so
+TypeScript 7.0.2 compiles them directly: foo.svelte.ts emits foo.svelte.js with
+the runes left in place for the consumer's Svelte compiler, plus
+foo.svelte.d.ts. This replaces svelte-package, whose svelte2tsx emitDts does
+not run on TypeScript 7 (RU13). The rune globals come from the svelte types
+(tsconfig "types": ["svelte"]).
+
+The in-house dependencies resolve through the Bazel module graph only, so the
+type check and the tests run under Bazel rather than plain pnpm.
 """
 
-load("@aspect_rules_js//js:defs.bzl", "js_binary", "js_library", "js_run_binary")
 load("@aspect_rules_js//npm:defs.bzl", "npm_link_package", "npm_package")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 load("@tummycrypt_tinyland_stores_npm//:defs.bzl", "npm_link_all_packages")
 load("@tummycrypt_tinyland_stores_npm//:vitest/package_json.bzl", vitest_bin = "bin")
-load("@tummycrypt_tinyland_stores_npm//:svelte-check/package_json.bzl", svelte_check = "bin")
 
 # =============================================================================
-# npm link - makes node_modules available for this package
+# npm links
 # =============================================================================
 
 npm_link_all_packages(name = "node_modules")
 
-# First-party deps resolved via the Bazel module graph (not npm). Each is linked from its
-# published module's :pkg target and kept out of package.json so npm_link_all_packages does
-# not also link it (TIN-1716). svelte peer is provided by this package's own node_modules,
-# so there is a single svelte instance.
-#   - tinyland-composables: autosave store helpers
-#   - tinyvectors:          getThemeCatalog() for the theme catalog (#570 hub labels)
-#   - tinyland-a11y-engine: browser a11y detection (/browser subpath; needs >= 0.2.4)
+# First-party deps from the Bazel module graph (not npm). Each is linked from
+# its module's :pkg target and kept out of package.json. svelte is a peer of
+# all of them and resolves to this package's own node_modules/svelte, so there
+# is a single svelte instance.
 npm_link_package(
     name = "node_modules/@tummycrypt/tinyland-composables",
     src = "@tummycrypt_tinyland_composables//:pkg",
 )
+
 npm_link_package(
     name = "node_modules/@tummycrypt/tinyvectors",
     src = "@tummycrypt_tinyvectors//:pkg",
 )
+
+# tinyland-a11y-engine 1.0.0 carries no npm links of its own; its runtime
+# dependency color-utils is linked here and passed in as `deps` (see the engine
+# README).
+npm_link_package(
+    name = "node_modules/@tummycrypt/tinyland-color-utils",
+    src = "@tummycrypt_tinyland_color_utils//:pkg",
+)
+
 npm_link_package(
     name = "node_modules/@tummycrypt/tinyland-a11y-engine",
     src = "@tummycrypt_tinyland_a11y_engine//:pkg",
+    deps = {
+        ":.aspect_rules_js/node_modules/@tummycrypt/tinyland-color-utils": "@tummycrypt/tinyland-color-utils",
+    },
 )
 
-# Self-anchoring svelte-package wrapper (TIN-1721). The raw
-# svelte_package.svelte_package_binary resolved `-i src` relative to
-# process.cwd(), which rules_js sets to $(BINDIR) with no chdir. That works when
-# stores is the ROOT package (standalone `bazel build //:pkg`, src at
-# $(BINDIR)/src) but breaks when stores is an EXTERNAL registry module under RBE
-# (src lands at $(BINDIR)/external/<repo>+/src while cwd stays $(BINDIR), so
-# `-i src` misses). build-svelte.mjs chdir's to its own copied-to-bin package dir
-# (import.meta.url) before delegating to @sveltejs/package, so `-i src` / `-o dist`
-# resolve correctly in both layouts.
-js_binary(
-    name = "svelte_package",
-    entry_point = "build-svelte.mjs",
-    data = [
-        ":node_modules/@sveltejs/package",
-        ":node_modules/typescript",
-        ":node_modules/svelte",
+FIRST_PARTY_LINKS = [
+    ":node_modules/@tummycrypt/tinyland-a11y-engine",
+    ":node_modules/@tummycrypt/tinyland-color-utils",
+    ":node_modules/@tummycrypt/tinyland-composables",
+    ":node_modules/@tummycrypt/tinyvectors",
+]
+
+SRCS = glob(
+    ["src/**/*.ts"],
+    exclude = [
+        "src/**/*.test.ts",
+        "src/**/*.spec.ts",
     ],
-    visibility = ["//visibility:public"],
 )
-
-svelte_check.svelte_check_binary(
-    name = "svelte_check",
-    visibility = ["//visibility:public"],
-)
-
-
 
 # =============================================================================
-# Svelte package build
-#
-# Uses svelte-package (from @sveltejs/package) to compile .svelte.ts
-# files into publishable output. Required for Svelte runes ($state, $derived).
+# TypeScript compilation (TypeScript 7.0.2, native)
 # =============================================================================
 
-js_run_binary(
-    name = "tinyland_stores_build",
-    tool = "//:svelte_package",
-    srcs = glob(
-        [
-            "src/**/*.ts",
-            "src/**/*.svelte",
-            "src/**/*.svelte.ts",
-        ],
-        exclude = [
-            "src/**/*.test.ts",
-            "src/**/*.spec.ts",
-        ],
-        allow_empty = True,
-    ) + [
-        "package.json",
-        "tsconfig.json",
-        ":node_modules",
-        ":node_modules/@tummycrypt/tinyland-composables",
-        ":node_modules/@tummycrypt/tinyvectors",
-        ":node_modules/@tummycrypt/tinyland-a11y-engine",
-    ],
-    args = [
-        "-i",
-        "src",
-        "-o",
-        "dist",
-    ],
-    out_dirs = ["dist"],
-    visibility = ["//visibility:public"],
-)
-
-js_library(
+ts_project(
     name = "tinyland_stores",
-    srcs = [":tinyland_stores_build"],
+    srcs = SRCS + ["package.json"],
+    declaration = True,
+    declaration_map = True,
+    source_map = False,
+    tsconfig = ":tsconfig.json",
+    transpiler = "tsc",
+    out_dir = "dist",
+    root_dir = "src",
+    validate = False,
+    deps = [":node_modules/svelte"] + FIRST_PARTY_LINKS,
     visibility = ["//visibility:public"],
+)
+
+# Plain output files only. svelte is a peer and the first-party modules are
+# linked by the consumer, so the package must not carry this repo's npm store
+# links (a link carried from another Bazel repo points into external/<repo>,
+# which is missing from a consumer's runfiles under Bazel 8).
+# DefaultInfo holds the .js files; the declarations (.d.ts, .d.ts.map) are in
+# the ts_project "types" output group, so both are listed.
+filegroup(
+    name = "dist",
+    srcs = [":tinyland_stores"],
+)
+
+filegroup(
+    name = "dist_types",
+    srcs = [":tinyland_stores"],
+    output_group = "types",
 )
 
 # =============================================================================
@@ -119,12 +116,15 @@ js_library(
 npm_package(
     name = "pkg",
     srcs = [
-        "package.json",
+        "CHANGELOG.md",
         "LICENSE",
-        ":tinyland_stores",
+        "README.md",
+        "package.json",
+        ":dist",
+        ":dist_types",
     ],
     package = "@tummycrypt/tinyland-stores",
-    version = "0.3.1",
+    version = "1.0.0",
     visibility = ["//visibility:public"],
 )
 
@@ -136,13 +136,11 @@ vitest_bin.vitest_test(
     name = "test",
     data = [
         ":node_modules",
+        "package.json",
         "tsconfig.json",
         ":node_modules/vitest",
-        ":node_modules/@tummycrypt/tinyland-composables",
-        ":node_modules/@tummycrypt/tinyvectors",
-        ":node_modules/@tummycrypt/tinyland-a11y-engine",
         "vitest.config.ts",
-    ] + glob(["src/**/*.ts"]) + glob(["tests/**/*.test.ts", "tests/**/*.ts"]),
+    ] + FIRST_PARTY_LINKS + glob(["src/**/*.ts"]) + glob(["tests/**/*.ts"]),
     args = [
         "run",
         "--reporter=verbose",
@@ -154,30 +152,19 @@ vitest_bin.vitest_test(
 )
 
 # =============================================================================
-# Typecheck target
+# Typecheck-only target (no emit). `bazel test //...` runs it as
+# //:typecheck_typecheck_test; `bazel build //:typecheck` alone builds nothing.
 # =============================================================================
 
-js_run_binary(
+ts_project(
     name = "typecheck",
-    tool = "//:svelte_check",
-    srcs = glob(
-        [
-            "src/**/*.ts",
-            "src/**/*.svelte",
-            "src/**/*.svelte.ts",
-        ],
-        allow_empty = True,
-    ) + [
-        "tsconfig.json",
-        ":node_modules",
-        ":node_modules/@tummycrypt/tinyland-composables",
-        ":node_modules/@tummycrypt/tinyvectors",
-        ":node_modules/@tummycrypt/tinyland-a11y-engine",
-    ],
-    args = [
-        "--tsconfig",
-        "tsconfig.json",
-    ],
+    srcs = SRCS + ["package.json"],
+    declaration = False,
+    no_emit = True,
+    tsconfig = ":tsconfig.json",
+    transpiler = "tsc",
+    validate = False,
+    deps = [":node_modules/svelte"] + FIRST_PARTY_LINKS,
     visibility = ["//visibility:public"],
 )
 

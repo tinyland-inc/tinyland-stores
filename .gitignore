@@ -1,6 +1,6 @@
 dist/
 coverage/
 node_modules/
+.svelte-kit/
 *.tsbuildinfo
 bazel-*
-MODULE.bazel.lock
